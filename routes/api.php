@@ -2,6 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CategoryController;
+use Illuminate\Support\Facades\Crypt;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,3 +19,18 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+// category manage
+Route::get('/categories', [CategoryController::class, 'getCategoriesByPage']);
+
+Route::get('/encrypt/{id}', function($id) {
+    $encryptedId = Crypt::encrypt($id);
+    return response()->json([
+        'original_id' => $id,
+        'encrypted_id' => $encryptedId,
+    ]);
+});
+Route::get('/category/{id}', [CategoryController::class, 'getCategoryById']);
+Route::post('/add-category', [CategoryController::class, 'addCategory']);
+Route::post('/update-category', [CategoryController::class, 'updateCategory']);
+Route::put('/category/change-status/{id}', [CategoryController::class, 'changeCategory']);
+Route::delete('/delete-category/{id}', [CategoryController::class, 'deleteCategory']);
