@@ -11,7 +11,7 @@ class CategoryController extends Controller
     public function getCategoriesByPage()
     {
         $categories = Category::paginate(10);
-        return response()->json($categories);
+        return $categories;
     }
     public function getCategoryById($encryptedId)
     {
