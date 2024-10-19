@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Category;
@@ -10,9 +9,10 @@ class CategoryController extends Controller
 {
     public function getCategoriesByPage()
     {
-        $categories = Category::paginate(10);
-        return response()->json($categories);
+        $categories = Category::getCategoriesByPage(10);
+        return $categories;
     }
+
     public function getCategoryById($encryptedId)
     {
         try {
@@ -20,7 +20,7 @@ class CategoryController extends Controller
             if (!is_numeric($decryptedId) || intval($decryptedId) <= 0) {
                 return response()->json(['error' => 'Invalid ID format.'], 400);
             }
-            $category = Category::findOrFail($decryptedId);
+            $category = Category::getCategoryById($decryptedId);
             return response()->json($category);
         } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
             return response()->json(['error' => 'Invalid or corrupted ID.'], 400);
@@ -28,6 +28,7 @@ class CategoryController extends Controller
             return response()->json(['error' => 'Category not found.'], 404);
         }
     }
+
     public function addCategory(Request $request)
     {
         $validatedData = $request->validate([
@@ -35,9 +36,10 @@ class CategoryController extends Controller
             'name' => 'required|string|max:255',
             'status' => 'required|integer'
         ]);
-        $category = Category::create($validatedData);
+        $category = Category::addCategory($validatedData);
         return response()->json($category, 201);
     }
+
     public function updateCategory(Request $request)
     {
         try {
@@ -45,28 +47,28 @@ class CategoryController extends Controller
             if (!is_numeric($decryptedId) || intval($decryptedId) <= 0) {
                 return response()->json(['error' => 'Invalid ID format.'], 400);
             }
-            $category = Category::findOrFail($decryptedId);
             $validatedData = $request->validate([
                 'parent_id' => 'required|integer',
                 'name' => 'required|string|max:255',
                 'status' => 'required|integer'
             ]);
-            $category->update($validatedData);
+            $category = Category::updateCategory($decryptedId, $validatedData);
             return response()->json($category);
         } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
             return response()->json(['error' => 'Invalid or corrupted ID.'], 400);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json(['error Category not found.'], 404);
+            return response()->json(['error' => 'Category not found.'], 404);
         }
     }
-    public function deleteCategory($encryptedId){
+
+    public function deleteCategory($encryptedId)
+    {
         try {
             $decryptedId = Crypt::decrypt($encryptedId);
             if (!is_numeric($decryptedId) || intval($decryptedId) <= 0) {
                 return response()->json(['error' => 'Invalid ID format.'], 400);
             }
-            $category = Category::findOrFail($decryptedId);
-            $category->delete();
+            Category::deleteCategory($decryptedId);
             return response()->json(null, 204);
         } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
             return response()->json(['error' => 'Invalid or corrupted ID.'], 400);
@@ -74,6 +76,7 @@ class CategoryController extends Controller
             return response()->json(['error' => 'Category not found.'], 404);
         }
     }
+
     public function changeCategory($encryptedId)
     {
         try {
@@ -81,14 +84,18 @@ class CategoryController extends Controller
             if (!is_numeric($decryptedId) || intval($decryptedId) <= 0) {
                 return response()->json(['error' => 'Invalid ID format.'], 400);
             }
-            $category = Category::findOrFail($decryptedId);
-            $category->status = 0;  
-            $category->save();      
+            $category = Category::changeCategoryStatus($decryptedId, 0);
             return response()->json($category);
         } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
             return response()->json(['error' => 'Invalid or corrupted ID.'], 400);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json(['error' => 'Category not found.'], 404);
         }
+    }
+
+    public function getAllCategories()
+    {
+        $categories = Category::getAllCategories();
+        return response()->json($categories);
     }
 }
