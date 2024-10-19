@@ -64,13 +64,22 @@ class ProductController extends Controller
     }
     public function getAllProducts(Request $request)
     {
-        $keyword = $request->input('keyword');
-        $query = Product::query();
+        $keyword = $request->input('keyword'); // Thay đổi từ search thành keyword
+        $productsQuery = Product::query();
+
+        // Nếu có từ khóa tìm kiếm, áp dụng điều kiện tìm kiếm
         if ($keyword) {
-            $query->where('name', 'like', "%$keyword%");
+            $productsQuery->where('name', 'like', '%' . $keyword . '%');
         }
-        $products = $query->orderBy('updated_at', 'desc')->paginate(2);
+
+        // Sắp xếp theo updated_at và phân trang
+        $products = $productsQuery->orderBy('updated_at', 'desc')->paginate(2);
+
+        // Kiểm tra nếu không có sản phẩm nào
+        if ($products->isEmpty() && $keyword) {
+            return response()->json(['message' => 'Product Not Found']);
+        }
+
         return response()->json($products);
     }
-    
 }

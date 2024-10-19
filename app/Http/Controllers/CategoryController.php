@@ -91,4 +91,8 @@ class CategoryController extends Controller
             return response()->json(['error' => 'Category not found.'], 404);
         }
     }
+    public function getAllCategories(){
+        $categories = Category::all();
+        return response()->json($categories);
+    }
 }
