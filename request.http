@@ -1,0 +1,26 @@
+### Register new user
+POST http://localhost:8000/api/register
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "johndoe@example.com",
+  "password": "password123",
+  "password_confirmation": "password123"
+}
+
+
+### Login user
+POST http://localhost:8000/api/login
+Content-Type: application/json
+
+{
+  "email": "johndoe@example.com",
+  "password": "password123"
+}
+
+
+### Logout user
+POST http://localhost:8000/api/logout
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwMDAvYXBpL2xvZ2luIiwiaWF0IjoxNzI5MjQ5MzQyLCJleHAiOjE3MjkyNTI5NDIsIm5iZiI6MTcyOTI0OTM0MiwianRpIjoiUEJNUlJRQ1g3eHR5Z3pSMSIsInN1YiI6IjEiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.9uXm6X0vmih-9fFhh1ayLPN-utnK1nfoKJNpLT7cZqw
+Content-Type: application/json
