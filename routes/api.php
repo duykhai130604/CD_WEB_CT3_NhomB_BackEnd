@@ -2,9 +2,11 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\LoginController;
+use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\CategoryController;
 use Illuminate\Support\Facades\Crypt;
-
+use App\Http\Controllers\AuthController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -34,3 +36,15 @@ Route::post('/add-category', [CategoryController::class, 'addCategory']);
 Route::post('/update-category', [CategoryController::class, 'updateCategory']);
 Route::put('/category/change-status/{id}', [CategoryController::class, 'changeCategory']);
 Route::delete('/delete-category/{id}', [CategoryController::class, 'deleteCategory']);
+
+//login
+// Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+// Route::post('/login', [LoginController::class, 'login'])->name('login.post');
+
+//register
+// Route::get('/register', [RegisterController::class, 'showRegisterForm'])->name('register');
+// Route::post('/register', [RegisterController::class, 'register'])->name('register.post');
+
+Route::post('register', [AuthController::class, 'register']);
+Route::post('login', [AuthController::class, 'login']);
+Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api');

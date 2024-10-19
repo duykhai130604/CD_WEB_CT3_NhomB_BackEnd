@@ -15,11 +15,3 @@ use App\Http\Controllers\RegisterController;
 */
 
 
-//login
-Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [LoginController::class, 'login'])->name('login.post');
-
-//register
-Route::get('/register', [RegisterController::class, 'showRegisterForm'])->name('register');
-Route::post('/register', [RegisterController::class, 'register'])->name('register.post');
-
