@@ -24,6 +24,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::get('/products', [ProductController::class, 'getAllProducts']);
 Route::get('/getAllCategories', [CategoryController::class, 'getAllCategories']);
 Route::post('/admin/addProduct',[ProductController::class,'addProduct']);
+Route::post('/admin/editProduct',[ProductController::class,'editProduct']);
+Route::get('/getProductDetails', [ProductController::class, 'getProductDetails']);
+
 // category manage
 Route::get('/categories', [CategoryController::class, 'getCategoriesByPage']);
 
