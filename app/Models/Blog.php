@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Blog extends Model
 {
     protected $table = 'blogs';
-    protected $fillable = ['title', 'content', 'thumbnail', 'author', 'status'];
+    protected $fillable = ['title', 'content', 'thumbnail', 'user_id'];
     public static function getBlogsByPage($perPage = 10)
     {
         return self::paginate($perPage);

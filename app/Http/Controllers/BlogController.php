@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Blog;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 
@@ -36,7 +37,7 @@ class BlogController extends Controller
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'thumbnail' => 'image|mimes:jpeg,png,jpg,gif|max:5000',
-            'author' => 'required|string|max:255',
+            'user_id' => 'required|integer',
         ]);
 
         $blog = Blog::create($validatedData);
@@ -55,8 +56,7 @@ class BlogController extends Controller
                 'title' => 'required|string|max:255',
                 'content' => 'required|string',
                 'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-                'author' => 'required|string|max:255',
-                'status' => 'required|integer',
+                'user_id' => 'required|integer',
             ]);
 
             $blog = Blog::findOrFail($decryptedId);
@@ -110,5 +110,11 @@ class BlogController extends Controller
     {
         $blogs = Blog::getAllBlogs();
         return response()->json($blogs);
+    }
+    public function getNameUserByIds(Request $request)
+    {
+    $ids = explode(',', $request->input('ids'));
+    $names = User::getUserByIds($ids);
+    return response()->json($names);
     }
 }

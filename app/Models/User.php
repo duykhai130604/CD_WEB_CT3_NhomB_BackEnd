@@ -9,7 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-use Tymon\JWTAuth\Contracts\JWTSubject; 
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -20,6 +20,7 @@ class User extends Authenticatable implements JWTSubject
      *
      * @var array<int, string>
      */
+    protected $table = "users";
     protected $fillable = [
         'name',
         'email',
@@ -58,5 +59,9 @@ class User extends Authenticatable implements JWTSubject
     {
         // Thêm các claims tùy chỉnh vào JWT nếu cần, ở đây trả về mảng trống
         return [];
+    }
+    public static function getUserByIds($ids)
+    {
+        return self::whereIn('id',$ids)->get(['id','name']);
     }
 }
