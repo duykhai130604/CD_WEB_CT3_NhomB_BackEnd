@@ -10,16 +10,16 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {
-        Schema::create('blogs', function (Blueprint $table) {
-            $table->id();
-            $table->string('title', 255)->collation('utf8mb4_unicode_ci');
-            $table->text('content')->collation('utf8mb4_unicode_ci');
-            $table->string('thumbnail', 255)->collation('utf8mb4_unicode_ci');
-            $table->string('author', 255)->collation('utf8mb4_unicode_ci');
-            $table->timestamps();
-        });
-    }
+{
+    Schema::create('blogs', function (Blueprint $table) {
+        $table->id();
+        $table->string('title', 255)->collation('utf8mb4_unicode_ci');
+        $table->text('content')->collation('utf8mb4_unicode_ci');
+        $table->string('thumbnail', 255)->collation('utf8mb4_unicode_ci');
+        $table->integer('user_id');
+        $table->timestamps();
+    });
+}
 
     /**
      * Reverse the migrations.
