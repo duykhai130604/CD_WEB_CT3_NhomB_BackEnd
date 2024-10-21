@@ -9,7 +9,7 @@ class Blog extends Model
 {
     protected $table = 'blogs';
     protected $fillable = ['title', 'content', 'thumbnail', 'author', 'status'];
-    public static function getBlogByPage($perPage = 10)
+    public static function getBlogsByPage($perPage = 10)
     {
         return self::paginate($perPage);
     }
@@ -45,7 +45,7 @@ class Blog extends Model
         return $blog;
     }
 
-    public static function getAllBlog()
+    public static function getAllBlogs()
     {
         return self::all();
     }

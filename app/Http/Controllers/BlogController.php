@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace App\Http\Controllers;
 
@@ -10,8 +10,8 @@ class BlogController extends Controller
 {
     public function getBlogByPage()
     {
-        $blogs = Blog::paginate(10); 
-        return response()->json($blogs);
+        $blogs = Blog::getBlogsByPage(10);
+        return $blogs;
     }
 
     public function getBlogById($encryptedId)
@@ -21,7 +21,7 @@ class BlogController extends Controller
             if (!is_numeric($decryptedId) || intval($decryptedId) <= 0) {
                 return response()->json(['error' => 'Invalid ID format.'], 400);
             }
-            $blog = Blog::findOrFail($decryptedId); 
+            $blog = Blog::findOrFail($decryptedId);
             return response()->json($blog);
         } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
             return response()->json(['error' => 'Invalid or corrupted ID.'], 400);
@@ -33,14 +33,13 @@ class BlogController extends Controller
     public function addBlog(Request $request)
     {
         $validatedData = $request->validate([
-            'title' => 'required|string|max:255',       
-            'content' => 'required|string',             
-            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', 
-            'author' => 'required|string|max:255',      
-            'status' => 'required|integer',        
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
+            'thumbnail' => 'image|mimes:jpeg,png,jpg,gif|max:5000',
+            'author' => 'required|string|max:255',
         ]);
 
-        $blog = Blog::create($validatedData); 
+        $blog = Blog::create($validatedData);
         return response()->json($blog, 201);
     }
 
@@ -53,15 +52,15 @@ class BlogController extends Controller
             }
 
             $validatedData = $request->validate([
-                'title' => 'required|string|max:255',       
-                'content' => 'required|string',             
-                'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', 
-                'author' => 'required|string|max:255',      
-                'status' => 'required|integer', 
+                'title' => 'required|string|max:255',
+                'content' => 'required|string',
+                'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'author' => 'required|string|max:255',
+                'status' => 'required|integer',
             ]);
 
             $blog = Blog::findOrFail($decryptedId);
-            $blog->update($validatedData); 
+            $blog->update($validatedData);
             return response()->json($blog);
         } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
             return response()->json(['error' => 'Invalid or corrupted ID.'], 400);
@@ -97,7 +96,7 @@ class BlogController extends Controller
             }
 
             $blog = Blog::findOrFail($decryptedId);
-            $blog->status = ($blog->status === 1) ? 0 : 1; 
+            $blog->status = ($blog->status === 1) ? 0 : 1;
             $blog->save();
             return response()->json($blog);
         } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
@@ -109,7 +108,7 @@ class BlogController extends Controller
 
     public function getAllBlogs()
     {
-        $blogs = Blog::all(); // Lấy tất cả các blog
+        $blogs = Blog::getAllBlogs();
         return response()->json($blogs);
     }
 }

@@ -58,7 +58,9 @@ Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api')
 
 //CRUD BLOG
 Route::get('/blog/{id}', [BlogController::class, 'getBlogById']);
+Route::get('/blogs', [BlogController::class, 'getAllBlogs']);
 Route::post('/add-blog', [BlogController::class, 'addBlog']);
 Route::post('/update-blog', [BlogController::class, 'updateBlog']);
 Route::put('/blog/change-status/{id}', [BlogController::class, 'changeBlog']);
 Route::delete('/delete-blog/{id}', [BlogController::class, 'deleteBlog']);
+
