@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Category;
@@ -36,8 +37,13 @@ class CategoryController extends Controller
             'name' => 'required|string|max:255',
             'status' => 'required|integer'
         ]);
-        $category = Category::addCategory($validatedData);
-        return response()->json($category, 201);
+        $categoryCheck = Category::getCategoryByName($request->name);
+        if ($categoryCheck) {
+            return  response()->json(0, 200);
+        } else {
+          Category::addCategory($validatedData);
+            return response()->json(1, 201);
+        }
     }
 
     public function updateCategory(Request $request)
@@ -52,8 +58,14 @@ class CategoryController extends Controller
                 'name' => 'required|string|max:255',
                 'status' => 'required|integer'
             ]);
-            $category = Category::updateCategory($decryptedId, $validatedData);
-            return response()->json($category);
+            $categoryCheck = Category::getCategoryByName($request->name);
+            if ($categoryCheck && $categoryCheck->id!= $decryptedId) {
+                return  response()->json(0, 200);
+            } 
+            else {
+            Category::updateCategory($decryptedId, $validatedData);
+            return response()->json(1, 201);
+            }
         } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
             return response()->json(['error' => 'Invalid or corrupted ID.'], 400);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
@@ -84,6 +96,7 @@ class CategoryController extends Controller
             if (!is_numeric($decryptedId) || intval($decryptedId) <= 0) {
                 return response()->json(['error' => 'Invalid ID format.'], 400);
             }
+
             $category = Category::changeCategoryStatus($decryptedId, 0);
             return response()->json($category);
         } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
@@ -96,6 +109,12 @@ class CategoryController extends Controller
     public function getAllCategories()
     {
         $categories = Category::getAllCategories();
+        return response()->json($categories);
+    }
+    public function getParentCategories(Request $request)
+    {
+        $ids = explode(',', $request->input('ids'));
+        $categories = Category::getCategoriesByIds($ids);
         return response()->json($categories);
     }
 }

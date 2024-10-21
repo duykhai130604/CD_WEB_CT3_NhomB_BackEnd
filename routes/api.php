@@ -41,6 +41,7 @@ Route::post('/add-category', [CategoryController::class, 'addCategory']);
 Route::post('/update-category', [CategoryController::class, 'updateCategory']);
 Route::put('/category/change-status/{id}', [CategoryController::class, 'changeCategory']);
 Route::delete('/delete-category/{id}', [CategoryController::class, 'deleteCategory']);
+Route::get('/categories/parent', [CategoryController::class, 'getParentCategories']);
 
 //login
 // Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');

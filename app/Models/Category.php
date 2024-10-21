@@ -9,10 +9,11 @@ class Category extends Model
 {
     protected $table = 'categories';
     protected $fillable = ['parent_id', 'name', 'status'];
-    public static function getCategoriesByPage($perPage = 10)
+    public static function getCategoriesByPage($perPage)
     {
-        return self::paginate($perPage);
+        return self::orderBy('created_at', 'desc')->paginate($perPage);
     }
+    
 
     public static function getCategoryById($id)
     {
@@ -48,6 +49,18 @@ class Category extends Model
     public static function getAllCategories()
     {
         return self::all();
+    }
+    public static function getCategoryByName($name)
+    {
+        return self::where('name', $name)->first(); 
+    }
+    public static function getCategoryByParentId($parent_id){
+        $categories = self::where('parent_id', $parent_id)->get();
+        return $categories->isEmpty() ? null : $categories;
+    }
+    public static function getCategoriesByIds(array $ids)
+    {
+        return self::whereIn('id', $ids)->get(['id', 'name']);
     }
     use HasFactory;
 }
