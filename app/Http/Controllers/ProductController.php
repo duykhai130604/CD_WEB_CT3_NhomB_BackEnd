@@ -11,27 +11,26 @@ class ProductController extends Controller
 {
     public function getAllProducts(Request $request)
     {
-        $keyword = $request->input('keyword');
-        $products = Product::getAllProducts($keyword);
-        if ($products->isEmpty() && $keyword) {
-            return response()->json(['message' => 'Product Not Found']);
-        }
+        return Product::getAllProducts($request);
+    }
 
-        return response()->json($products);
+    public function getProductDetails(Request $request)
+    {
+        return Product::getProductDetails($request);
     }
 
     public function addProduct(Request $request)
     {
-        $result = Product::addProduct($request);
-        if ($result['status'] === 'error') {
-            return response()->json([
-                'errors' => $result['errors'] ?? $result['message']
-            ], 422);
-        }
-        return response()->json([
-            'message' => $result['message'],
-            'product' => $result['product']
-        ], 201);
+        return Product::addProduct($request);
+    }
+
+    public function editProduct(Request $request)
+    {
+        return Product::editProduct($request);
+    }
+    
+    public function deleteProduct(Request $request) {
+        return Product::destroy($request);
     }
     public function getProductByCategoryId($cateId){
         $decryptedId = Crypt::decrypt($cateId);
