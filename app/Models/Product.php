@@ -16,7 +16,6 @@ class Product extends Model
         return $this->belongsToMany(Category::class, 'product_category', 'product_id', 'category_id');
     }
 
-    public static function getAllProducts($keyword)
     /**
      * Giải mã ID sản phẩm từ chuỗi đã mã hóa.
      *
