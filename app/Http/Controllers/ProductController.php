@@ -9,7 +9,6 @@ class ProductController extends Controller
 {
     public function getAllProducts(Request $request)
     {
-        
         return Product::getAllProducts($request);
     }
 

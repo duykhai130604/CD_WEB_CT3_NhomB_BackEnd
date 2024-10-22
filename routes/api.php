@@ -10,6 +10,9 @@ use App\Http\Controllers\BlogController;
 
 use Illuminate\Support\Facades\Crypt;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProductVariantController;
+use App\Models\CloudinaryModel;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -31,6 +34,7 @@ Route::post('/admin/addProduct',[ProductController::class,'addProduct']);
 Route::post('/admin/editProduct',[ProductController::class,'editProduct']);
 Route::get('/getProductDetails', [ProductController::class, 'getProductDetails']);
 Route::delete('/admin/deleteProduct', [ProductController::class, 'deleteProduct']);
+Route::get('/admin/productVariants', [ProductVariantController::class, 'getAllProductVariants']);
 // category manage
 Route::get('/categories', [CategoryController::class, 'getCategoriesByPage']);
 
@@ -69,3 +73,12 @@ Route::put('/blog/change-status/{id}', [BlogController::class, 'changeBlog']);
 Route::delete('/delete-blog/{id}', [BlogController::class, 'deleteBlog']);
 Route::get('/get-authorname', [BlogController::class, 'getNameUserByIds']);
 
+//Images
+Route::post('/upload-images', function (Request $request) {
+
+    // Gọi hàm uploadImage từ service hoặc trực tiếp
+    $response = CloudinaryModel::uploadImage($request->file('images'));
+
+    // Trả về kết quả
+    return response()->json($response);
+});
