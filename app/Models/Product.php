@@ -5,9 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
+
 class Product extends Model
 {
     use HasFactory;
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class, 'product_category', 'product_id', 'category_id');
+    }
+
     public static function getAllProducts($keyword)
     {
         $productsQuery = self::query();
@@ -74,5 +80,13 @@ class Product extends Model
                 'message' => 'System error, please try again later'
             ];
         }
+    }
+    public static function getProductsByCategory($categoryId)
+    {
+        return self::select('products.*')
+            ->join('product_category', 'products.id', '=', 'product_category.product_id')
+            ->join('categories', 'product_category.category_id', '=', 'categories.id')
+            ->where('categories.id', $categoryId)
+            ->get();
     }
 }
