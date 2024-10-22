@@ -29,6 +29,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::get('/products', [ProductController::class, 'getAllProducts']);
+Route::get('/products-category/{id}', [ProductController::class, 'getProductByCategoryId']);
 Route::get('/getAllCategories', [CategoryController::class, 'getAllCategories']);
 Route::post('/admin/addProduct',[ProductController::class,'addProduct']);
 Route::post('/admin/editProduct',[ProductController::class,'editProduct']);
@@ -51,6 +52,9 @@ Route::post('/update-category', [CategoryController::class, 'updateCategory']);
 Route::put('/category/change-status/{id}', [CategoryController::class, 'changeCategory']);
 Route::delete('/delete-category/{id}', [CategoryController::class, 'deleteCategory']);
 Route::get('/categories/parent', [CategoryController::class, 'getParentCategories']);
+Route::post('/category/check-assets', [CategoryController::class, 'checkCategoryAssets']);
+Route::get('/category-childs/{id}', [CategoryController::class, 'getCategoryByParentId']);
+Route::post('/update-product-category-and-parent', [CategoryController::class, 'updateProductCategoryAndParent']);
 
 //login
 // Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');

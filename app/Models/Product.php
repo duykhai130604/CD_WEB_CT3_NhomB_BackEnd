@@ -11,7 +11,12 @@ use Illuminate\Support\Facades\Validator;
 class Product extends Model
 {
     use HasFactory;
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class, 'product_category', 'product_id', 'category_id');
+    }
 
+    public static function getAllProducts($keyword)
     /**
      * Giải mã ID sản phẩm từ chuỗi đã mã hóa.
      *
@@ -262,5 +267,13 @@ class Product extends Model
             'status' => 'success',
             'message' => 'Product deleted successfully.'
         ]);
+    }
+    public static function getProductsByCategory($categoryId)
+    {
+        return self::select('products.*')
+            ->join('product_category', 'products.id', '=', 'product_category.product_id')
+            ->join('categories', 'product_category.category_id', '=', 'categories.id')
+            ->where('categories.id', $categoryId)
+            ->get();
     }
 }
