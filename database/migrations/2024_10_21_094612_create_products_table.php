@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id()->unsigned(); 
             $table->string('name', 255)->collation('utf8mb4_unicode_ci');
             $table->text('desc')->collation('utf8mb4_unicode_ci'); 
-            $table->integer('category_id'); 
             $table->integer('price'); 
             $table->integer('discount'); 
             $table->integer('status'); 

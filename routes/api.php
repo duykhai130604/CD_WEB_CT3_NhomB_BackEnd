@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -36,6 +37,8 @@ Route::post('/admin/editProduct',[ProductController::class,'editProduct']);
 Route::get('/getProductDetails', [ProductController::class, 'getProductDetails']);
 Route::delete('/admin/deleteProduct', [ProductController::class, 'deleteProduct']);
 Route::get('/admin/productVariants', [ProductVariantController::class, 'getAllProductVariants']);
+
+Route::get('/getCategoriesByProductId', [ProductCategoryController::class, 'getCategoriesByProductId']);
 // category manage
 Route::get('/categories', [CategoryController::class, 'getCategoriesByPage']);
 
