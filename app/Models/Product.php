@@ -13,25 +13,6 @@ class Product extends Model
     use HasFactory;
 
     /**
-     * Giải mã ID sản phẩm từ chuỗi đã mã hóa.
-     *
-     * @param string $encodedId
-     * @return string|null
-     */
-    public static function decodeProductId($encodedId)
-    {
-        $secretString = env('PRODUCT_SECRET_STRING');
-        $decodedId = base64_decode($encodedId, true);
-        if ($decodedId === false || strpos($decodedId, $secretString) === false) {
-            return null;
-        }
-        $productId = str_replace($secretString, '', $decodedId);
-        if (!is_numeric($productId)) {
-            return null;
-        }
-        return $productId;
-    }
-    /**
      * Lấy thông tin chi tiết của sản phẩm bằng ID đã mã hóa.
      *
      * @param string $encodedId
@@ -40,7 +21,7 @@ class Product extends Model
     public static function getProductDetails($request)
     {
         $encodedId = $request->input('encodedId');
-        $productId = self::decodeProductId($encodedId);
+        $productId = EncryptionModel::decodeProductId($encodedId);
         $product = Product::find($productId);
         if (!$product) {
             return response()->json(['status' => 'error', 'message' => 'Product not found'], 404);
@@ -67,10 +48,9 @@ class Product extends Model
         if ($products->isEmpty()) {
             return response()->json(['message' => 'Product Not Found']);
         }
-        $secretString = env('PRODUCT_SECRET_STRING');
-        $responseData = $products->getCollection()->map(function ($product) use ($secretString) {
+        $responseData = $products->getCollection()->map(function ($product) {
             return [
-                'id' => base64_encode($product->id . $secretString),
+                'id' => EncryptionModel::encodeProductId($product->id),
                 'name' => $product->name,
                 'desc' => $product->desc,
                 'category_id' => $product->category_id,
@@ -104,8 +84,8 @@ class Product extends Model
             'price.digits_between' => 'Price must be a integer greater than 0 and up to 12 digits',
             'discount.integer' => 'Discount must be a integer and 0 < Discount < 101',
             'discount.between' => 'Discount must be a integer and 0 < Discount < 101',
-            'category_id.required' => 'Required field',
-            'category_id.exists' => 'Invalid category selection',
+            'categories.required' => 'Required field',
+            'categories.array' => 'Categories must be an array',
             'desc.required' => 'Required field',
             'desc.max' => 'The length of description must be between 1 and 2000 characters'
         ];
@@ -114,7 +94,7 @@ class Product extends Model
             'name' => 'required|regex:/^[\p{L}\p{N} ]+$/u|min:3|max:255',
             'price' => 'required|integer|min:1|digits_between:1,12',
             'discount' => 'nullable|integer|between:0,101',
-            'category_id' => 'required|exists:categories,id',
+            'categories' => 'required|array|exists:categories,id',
             'desc' => 'required|max:2000',
         ], $messages);
 
@@ -124,7 +104,7 @@ class Product extends Model
                 'name' => $errors->first('name'),
                 'price' => $errors->first('price'),
                 'discount' => $errors->first('discount'),
-                'category_id' => $errors->first('category_id'),
+                'categories' => $errors->first('categories'),
                 'desc' => $errors->first('desc'),
             ];
             return response()->json([
@@ -134,16 +114,19 @@ class Product extends Model
         }
 
         try {
+            // Tạo sản phẩm mới
             $product = new self();
             $product->name = $request->name;
             $product->price = $request->price;
             $product->discount = $request->discount ?? 0;
-            $product->category_id = $request->category_id;
             $product->desc = $request->desc;
             $product->status = $request->status ?? 1;
             $product->created_at = now();
             $product->updated_at = now();
             $product->save();
+
+            // Gọi hàm thêm danh mục cho sản phẩm vào bảng product_category
+            ProductCategory::addProductCategories($product->id, $request->categories);
 
             return response()->json([
                 'status' => 'success',
@@ -157,6 +140,7 @@ class Product extends Model
             ], 500);
         }
     }
+
     /**
      * Cập nhật thông tin sản phẩm đã tồn tại trong cơ sở dữ liệu.
      *
@@ -177,16 +161,17 @@ class Product extends Model
             'price.digits_between' => 'Price must be a integer greater than 0 and up to 12 digits',
             'discount.integer' => 'Discount must be a integer and 0 < Discount < 101',
             'discount.between' => 'Discount must be a integer and 0 < Discount < 101',
-            'category_id.required' => 'Required field',
-            'category_id.exists' => 'Invalid category selection',
+            'categories.required' => 'Required field',
+            'categories.array' => 'Categories must be an array',
             'desc.required' => 'Required field',
             'desc.max' => 'The length of description must be between 1 and 2000 characters'
         ];
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|regex:/^[\p{L}\p{N} ]+$/u|min:3|max:255',
             'price' => 'required|integer|min:1|digits_between:1,12',
             'discount' => 'nullable|integer|between:0,101',
-            'category_id' => 'required|exists:categories,id',
+            'categories' => 'required|array|exists:categories,id',
             'desc' => 'required|max:2000',
         ], $messages);
 
@@ -196,7 +181,7 @@ class Product extends Model
                 'name' => $errors->first('name'),
                 'price' => $errors->first('price'),
                 'discount' => $errors->first('discount'),
-                'category_id' => $errors->first('category_id'),
+                'categories' => $errors->first('categories'),
                 'desc' => $errors->first('desc'),
             ];
             return response()->json([
@@ -206,7 +191,7 @@ class Product extends Model
         }
 
         try {
-            $id = self::decodeProductId($request->id);
+            $id = EncryptionModel::decodeProductId($request->id);
             $product = self::find($id);
             if (!$product || $product->status == 0) {
                 return response()->json([
@@ -214,14 +199,17 @@ class Product extends Model
                     'message' => 'The product has been deleted.'
                 ], 404);
             }
+
             $product->name = $request->name;
             $product->price = $request->price;
             $product->discount = $request->discount ?? 0;
-            $product->category_id = $request->category_id;
             $product->desc = $request->desc;
             $product->status = $request->status ?? 1;
             $product->updated_at = now();
             $product->save();
+
+            // Cập nhật danh mục sản phẩm
+            ProductCategory::updateProductCategories($product->id, $request->categories);
 
             return response()->json([
                 'status' => 'success',
@@ -234,6 +222,7 @@ class Product extends Model
             ], 500);
         }
     }
+
     /**
      * Xóa sản phẩm khỏi cơ sở dữ liệu.
      *
@@ -242,7 +231,7 @@ class Product extends Model
      */
     public static function destroy($request)
     {
-        $id = self::decodeProductId($request->id);
+        $id = EncryptionModel::decodeProductId($request->id);
         $product = Product::find($id);
         if (!$product) {
             return response()->json([
