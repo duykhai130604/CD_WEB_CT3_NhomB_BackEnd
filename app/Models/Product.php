@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
@@ -36,8 +37,9 @@ class Product extends Model
      * @param string $encodedId
      * @return \Illuminate\Http\JsonResponse
      */
-    public static function getProductDetails($encodedId)
+    public static function getProductDetails($request)
     {
+        $encodedId = $request->input('encodedId');
         $productId = self::decodeProductId($encodedId);
         $product = Product::find($productId);
         if (!$product) {
@@ -54,8 +56,9 @@ class Product extends Model
      * @param string|null $keyword
      * @return \Illuminate\Http\JsonResponse
      */
-    public static function getAllProducts($keyword)
+    public static function getAllProducts($request)
     {
+        $keyword = $request->input('keyword');
         $productsQuery = self::query();
         if ($keyword) {
             $productsQuery->where('name', 'like', '%' . $keyword . '%');
@@ -230,5 +233,34 @@ class Product extends Model
                 'message' => 'System error, please try again later'
             ], 500);
         }
+    }
+    /**
+     * Xóa sản phẩm khỏi cơ sở dữ liệu.
+     *
+     * @param int $id ID của sản phẩm cần xóa.
+     * @return \Illuminate\Http\JsonResponse Phản hồi dưới dạng JSON, bao gồm trạng thái và thông báo.
+     */
+    public static function destroy($request)
+    {
+        $id = self::decodeProductId($request->id);
+        $product = Product::find($id);
+        if (!$product) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Product not found.'
+            ], 404);
+        }
+        $productVariantCount = DB::table('product_variants')->where('product_id', $id)->count();
+        if ($productVariantCount > 0) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Cannot delete this product because it is being used in the product_variant table.'
+            ], 400);
+        }
+        $product->delete();
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Product deleted successfully.'
+        ]);
     }
 }

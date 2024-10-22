@@ -30,7 +30,7 @@ Route::get('/getAllCategories', [CategoryController::class, 'getAllCategories'])
 Route::post('/admin/addProduct',[ProductController::class,'addProduct']);
 Route::post('/admin/editProduct',[ProductController::class,'editProduct']);
 Route::get('/getProductDetails', [ProductController::class, 'getProductDetails']);
-
+Route::delete('/admin/deleteProduct', [ProductController::class, 'deleteProduct']);
 // category manage
 Route::get('/categories', [CategoryController::class, 'getCategoriesByPage']);
 
