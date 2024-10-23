@@ -13,6 +13,10 @@ class Blog extends Model
     {
         return self::paginate($perPage);
     }
+    public static function getBlogsByUserPage($perPage )
+    {
+        return self::paginate($perPage);
+    }
 
     public static function getBlogById($id)
     {
@@ -48,6 +52,10 @@ class Blog extends Model
     public static function getAllBlogs()
     {
         return self::all();
+    }
+    public static function getBlogByAuthorId($id)
+    {
+        return self::orderBy('created_at', 'desc')::where('user_id', $id)->get();
     }
     use HasFactory;
 }
