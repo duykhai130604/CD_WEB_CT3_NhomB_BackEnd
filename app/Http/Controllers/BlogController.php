@@ -121,9 +121,18 @@ class BlogController extends Controller
         $names = User::getUserByIds($ids);
         return response()->json($names);
     }
-    public function getBlogsByAuthorId($categoryId)
+    public function getBlogsByAuthorId($id)
     {
-        $blogs = Blog::getBlogsByAuthorId($categoryId);
+        $decrypId = Crypt::decrypt($id);
+        if (!is_numeric($decrypId) || intval($decrypId) <= 0) {
+            return response()->json(['error' => 'Invalid ID format.'], 400);
+        }
+        $blogs = Blog::getBlogByAuthorId($decrypId);
         return response()->json($blogs);
+    }
+    public function getAuthorsWithCountBlog()
+    {
+        $users = User::getUsersWithBlogCount();
+        return response()->json($users);
     }
 }
