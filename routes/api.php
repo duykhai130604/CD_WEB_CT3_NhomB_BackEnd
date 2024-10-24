@@ -74,11 +74,14 @@ Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api')
 //CRUD BLOG
 Route::get('/blog/{id}', [BlogController::class, 'getBlogById']);
 Route::get('/blogs', [BlogController::class, 'getAllBlogs']);
+Route::get('/user-blogs', [BlogController::class, 'getBlogsByUserPage']);
 Route::post('/add-blog', [BlogController::class, 'addBlog']);
+Route::get('/authors-count-blog', [BlogController::class, 'getAuthorsWithCountBlog']);
 Route::post('/update-blog', [BlogController::class, 'updateBlog']);
 Route::put('/blog/change-status/{id}', [BlogController::class, 'changeBlog']);
 Route::delete('/delete-blog/{id}', [BlogController::class, 'deleteBlog']);
 Route::get('/get-authorname', [BlogController::class, 'getNameUserByIds']);
+Route::get('/get-blog-by-author/{id}', [BlogController::class, 'getBlogsByAuthorId']);
 
 //Images
 Route::post('/upload-images', function (Request $request) {

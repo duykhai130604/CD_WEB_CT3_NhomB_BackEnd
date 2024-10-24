@@ -64,4 +64,16 @@ class User extends Authenticatable implements JWTSubject
     {
         return self::whereIn('id',$ids)->get(['id','name']);
     }
+    public function blogs()
+    {
+        return $this->hasMany(Blog::class, 'user_id');
+    }
+    public static function getUsersWithBlogCount()
+    {
+        return self::select('users.*')
+        ->selectRaw('COUNT(blogs.id) as blog_count')
+        ->join('blogs', 'users.id', '=', 'blogs.user_id')
+        ->groupBy('users.id')
+        ->get();
+    }
 }
