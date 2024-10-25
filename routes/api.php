@@ -92,3 +92,5 @@ Route::post('/upload-images', function (Request $request) {
     // Trả về kết quả
     return response()->json($response);
 });
+// track users
+Route::get('/top-products', [ProductController::class, 'getTopProducts']);

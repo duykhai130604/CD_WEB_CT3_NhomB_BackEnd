@@ -40,4 +40,9 @@ class ProductController extends Controller
         }
         return response()->json(['message' => 'Product Not Found.'], 404);
     }
+    public function getTopProducts()
+    {
+        $topProducts = Product::getTopProducts();
+        return response()->json($topProducts);
+    }
 }

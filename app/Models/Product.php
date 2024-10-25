@@ -264,4 +264,15 @@ class Product extends Model
             ->where('categories.id', $categoryId)
             ->get();
     }
+    public static function getTopProducts()
+    {
+        return self::select('products.*')
+            ->join('behaviors', 'products.id', '=', 'behaviors.product_id')
+            ->whereIn('behaviors.action', ['click', 'follow'])
+            ->selectRaw('count(behaviors.id) as action_count')
+            ->groupBy('products.id')
+            ->orderByDesc('action_count')
+            ->limit(8)
+            ->get();
+    }
 }
