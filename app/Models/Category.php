@@ -9,11 +9,15 @@ class Category extends Model
 {
     protected $table = 'categories';
     protected $fillable = ['parent_id', 'name', 'status'];
+    public function products()
+    {
+        return $this->belongsToMany(Product::class, 'product_category', 'category_id', 'product_id');
+    }
     public static function getCategoriesByPage($perPage)
     {
         return self::orderBy('created_at', 'desc')->paginate($perPage);
     }
-    
+
 
     public static function getCategoryById($id)
     {
@@ -52,9 +56,10 @@ class Category extends Model
     }
     public static function getCategoryByName($name)
     {
-        return self::where('name', $name)->first(); 
+        return self::where('name', $name)->first();
     }
-    public static function getCategoryByParentId($parent_id){
+    public static function getCategoryByParentId($parent_id)
+    {
         $categories = self::where('parent_id', $parent_id)->get();
         return $categories->isEmpty() ? null : $categories;
     }
@@ -62,5 +67,14 @@ class Category extends Model
     {
         return self::whereIn('id', $ids)->get(['id', 'name']);
     }
+    public static function getCategoriesByParentId($parentId)
+    {
+        return self::where('parent_id', $parentId)->get();
+    }
+    public static function editParent(array $ids, $newParent)
+    {
+        return self::whereIn('id', $ids)->update(['parent_id' => $newParent]);
+    }
+    
     use HasFactory;
 }

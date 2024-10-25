@@ -38,6 +38,7 @@ class BlogController extends Controller
             'content' => 'required|string',
             'thumbnail' => 'image|mimes:jpeg,png,jpg,gif|max:5000',
             'user_id' => 'required|integer',
+            'status' => 'required|integer',
         ]);
 
         $blog = Blog::create($validatedData);
@@ -78,9 +79,7 @@ class BlogController extends Controller
             if (!is_numeric($decryptedId) || intval($decryptedId) <= 0) {
                 return response()->json(['error' => 'Invalid ID format.'], 400);
             }
-
-            $blog = Blog::findOrFail($decryptedId);
-            $blog->delete();
+             Blog::deleteBlog($decryptedId);
             return response()->json(null, 204);
         } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
             return response()->json(['error' => 'Invalid or corrupted ID.'], 400);
