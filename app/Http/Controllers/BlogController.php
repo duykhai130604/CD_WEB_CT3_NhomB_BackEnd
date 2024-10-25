@@ -14,7 +14,11 @@ class BlogController extends Controller
         $blogs = Blog::getBlogsByPage(10);
         return $blogs;
     }
-
+    public function getBlogsByUserPage()
+    {
+        $blogs = Blog::getBlogsByUserPage(3);
+        return $blogs;
+    }
     public function getBlogById($encryptedId)
     {
         try {
@@ -22,6 +26,7 @@ class BlogController extends Controller
             if (!is_numeric($decryptedId) || intval($decryptedId) <= 0) {
                 return response()->json(['error' => 'Invalid ID format.'], 400);
             }
+            //hàm này phải gọi từ model
             $blog = Blog::findOrFail($decryptedId);
             return response()->json($blog);
         } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
@@ -58,12 +63,8 @@ class BlogController extends Controller
                 'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
                 'user_id' => 'required|integer',
             ]);
-            $blog = Blog::findOrFail($decryptedId);      
-            if ($request->hasFile('thumbnail')) {
-                $thumbnail = $request->file('thumbnail');
-                $thumbnailPath = $thumbnail->store('thumbnails', 'public');
-                $validatedData['thumbnail'] = $thumbnailPath; 
-            }      
+
+            $blog = Blog::findOrFail($decryptedId);
             $blog->update($validatedData);
             return response()->json($blog);
         } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
@@ -79,7 +80,7 @@ class BlogController extends Controller
             if (!is_numeric($decryptedId) || intval($decryptedId) <= 0) {
                 return response()->json(['error' => 'Invalid ID format.'], 400);
             }
-             Blog::deleteBlog($decryptedId);
+            Blog::deleteBlog($decryptedId);
             return response()->json(null, 204);
         } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
             return response()->json(['error' => 'Invalid or corrupted ID.'], 400);
@@ -94,7 +95,7 @@ class BlogController extends Controller
             if (!is_numeric($decryptedId) || intval($decryptedId) <= 0) {
                 return response()->json(['error' => 'Invalid ID format.'], 400);
             }
-
+            //hàm này phải gọi từ model
             $blog = Blog::findOrFail($decryptedId);
             $blog->status = ($blog->status === 1) ? 0 : 1;
             $blog->save();
@@ -112,8 +113,22 @@ class BlogController extends Controller
     }
     public function getNameUserByIds(Request $request)
     {
-    $ids = explode(',', $request->input('ids'));
-    $names = User::getUserByIds($ids);
-    return response()->json($names);
+        $ids = explode(',', $request->input('ids'));
+        $names = User::getUserByIds($ids);
+        return response()->json($names);
+    }
+    public function getBlogsByAuthorId($id)
+    {
+        $decrypId = Crypt::decrypt($id);
+        if (!is_numeric($decrypId) || intval($decrypId) <= 0) {
+            return response()->json(['error' => 'Invalid ID format.'], 400);
+        }
+        $blogs = Blog::getBlogByAuthorId($decrypId);
+        return response()->json($blogs);
+    }
+    public function getAuthorsWithCountBlog()
+    {
+        $users = User::getUsersWithBlogCount();
+        return response()->json($users);
     }
 }

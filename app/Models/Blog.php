@@ -11,7 +11,11 @@ class Blog extends Model
     protected $fillable = ['title', 'content', 'thumbnail', 'user_id','status'];
     public static function getBlogsByPage($perPage = 10)
     {
-        return self::paginate($perPage);
+        return self::orderBy('created_at', 'desc')->paginate($perPage);
+    }
+    public static function getBlogsByUserPage($perPage )
+    {
+        return self::orderBy('created_at', 'desc')->paginate($perPage);
     }
 
     public static function getBlogById($id)
@@ -49,5 +53,11 @@ class Blog extends Model
     {
         return self::all();
     }
+    public static function getBlogByAuthorId($id)
+    {
+        return self::orderBy('created_at', 'desc')->where('user_id', $id)->paginate(3);
+    }
+   
+    
     use HasFactory;
 }
