@@ -67,6 +67,8 @@ Route::post('/update-product-category-and-parent', [CategoryController::class, '
 // Route::get('/register', [RegisterController::class, 'showRegisterForm'])->name('register');
 // Route::post('/register', [RegisterController::class, 'register'])->name('register.post');
 //LOGIN,REGISTER
+//Reset password
+Route::post('/reset', [AuthController::class, 'reset']);
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api');
@@ -82,6 +84,9 @@ Route::put('/blog/change-status/{id}', [BlogController::class, 'changeBlog']);
 Route::delete('/delete-blog/{id}', [BlogController::class, 'deleteBlog']);
 Route::get('/get-authorname', [BlogController::class, 'getNameUserByIds']);
 Route::get('/get-blog-by-author/{id}', [BlogController::class, 'getBlogsByAuthorId']);
+
+// sửa profile
+Route::middleware('auth:sanctum')->put('/profile', [ProfileController::class, 'update']);
 
 //Images
 Route::post('/upload-images', function (Request $request) {
