@@ -123,7 +123,7 @@ class CategoryController extends Controller
         $cateId = $request->id;
         $categories = Category::getCategoryByParentId($cateId);
         $products = Product::getProductsByCategory($cateId);
-        if ($categories) {
+        if ($categories || $products) {
             return response()->json(['categories' => $categories, 'products' => $products], 201);
         }
         return response()->json(['message' => 'Category has no assets.'], 200);

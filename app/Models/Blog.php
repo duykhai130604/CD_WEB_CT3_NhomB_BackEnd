@@ -41,11 +41,11 @@ class Blog extends Model
         $blog->delete();
     }
 
-    public static function changeBlogStatus($id, $status = 0)
+    public static function changeBlogStatus($id)
     {
-        $blog = self::findOrFail($id);
-        $blog->status = $status;
-        $blog->save();
+          $blog = Blog::findOrFail($id);
+          $blog->status = ($blog->status === 1 || $blog->status === 0) ? -1 : $blog->status;
+          $blog->save();
         return $blog;
     }
 

@@ -12,17 +12,17 @@ class Behavior extends Model
     protected $table = 'behaviors';
     protected $fillable = ['user_id', 'action', 'search_query', 'product_id'];
 
-    // Hàm theo dõi hành vi tìm kiếm sản phẩm
-    public static function trackProductSearch($request)
-    {
-        $searchQuery = $request->input('query'); 
+    // // Hàm theo dõi hành vi tìm kiếm sản phẩm
+    // public static function trackProductSearch($request)
+    // {
+    //     $searchQuery = $request->input('query'); 
 
-        self::create([
-            'user_id' => auth()->id(),
-            'action' => 'search',
-            'search_query' => $searchQuery,
-        ]);
-    }
+    //     self::create([
+    //         'user_id' => auth()->id(),
+    //         'action' => 'search',
+    //         'search_query' => $searchQuery,
+    //     ]);
+    // }
 
     // Hàm theo dõi hành vi click vào sản phẩm
     public static function trackProductClick($productId)
