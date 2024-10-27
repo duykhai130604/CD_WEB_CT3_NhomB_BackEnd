@@ -8,10 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class Blog extends Model
 {
     protected $table = 'blogs';
-    protected $fillable = ['title', 'content', 'thumbnail', 'user_id'];
+    protected $fillable = ['title', 'content', 'thumbnail', 'user_id','status'];
     public static function getBlogsByPage($perPage = 10)
     {
-        return self::paginate($perPage);
+        return self::orderBy('created_at', 'desc')->paginate($perPage);
+    }
+    public static function getBlogsByUserPage($perPage )
+    {
+        return self::orderBy('created_at', 'desc')->paginate($perPage);
     }
 
     public static function getBlogById($id)
@@ -37,17 +41,23 @@ class Blog extends Model
         $blog->delete();
     }
 
-    public static function changeBlogStatus($id, $status = 0)
+    public static function changeBlogStatus($id)
     {
-        $blog = self::findOrFail($id);
-        $blog->status = $status;
-        $blog->save();
+          $blog = Blog::findOrFail($id);
+          $blog->status = ($blog->status === 1 || $blog->status === 0) ? -1 : $blog->status;
+          $blog->save();
         return $blog;
     }
-
+    
     public static function getAllBlogs()
     {
         return self::all();
     }
+    public static function getBlogByAuthorId($id)
+    {
+        return self::orderBy('created_at', 'desc')->where('user_id', $id)->paginate(3);
+    }
+   
+    
     use HasFactory;
 }

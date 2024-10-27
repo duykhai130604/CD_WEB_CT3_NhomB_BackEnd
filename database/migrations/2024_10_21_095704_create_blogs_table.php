@@ -16,8 +16,10 @@ return new class extends Migration
         $table->string('title', 255)->collation('utf8mb4_unicode_ci');
         $table->text('content')->collation('utf8mb4_unicode_ci');
         $table->string('thumbnail', 255)->collation('utf8mb4_unicode_ci');
+        $table->integer('status');
         $table->integer('user_id');
         $table->timestamps();
+        $table->timestamp('deleted_at')->nullable()->useCurrent();
     });
 }
 

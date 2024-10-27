@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Validator;
 class Product extends Model
 {
     use HasFactory;
+
     use SoftDeletes;
     public static function checkProduct($request)
     {
@@ -30,6 +31,9 @@ class Product extends Model
             'message' => 'Product exists',
             'status' => 'success'
         ]);
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class, 'product_category', 'product_id', 'category_id');
     }
 
     /**
@@ -272,5 +276,25 @@ class Product extends Model
             'status' => 'success',
             'message' => 'Product deleted successfully.'
         ]);
+    }
+    public static function getProductsByCategory($categoryId)
+    {
+      $products =  self::select('products.*')
+            ->join('product_category', 'products.id', '=', 'product_category.product_id')
+            ->join('categories', 'product_category.category_id', '=', 'categories.id')
+            ->where('categories.id', $categoryId)
+            ->get();
+            return $products->isEmpty() ? null : $products;
+    }
+    public static function getTopProducts()
+    {
+        return self::select('products.*')
+            ->join('behaviors', 'products.id', '=', 'behaviors.product_id')
+            ->whereIn('behaviors.action', ['click', 'follow'])
+            ->selectRaw('count(behaviors.id) as action_count')
+            ->groupBy('products.id')
+            ->orderByDesc('action_count')
+            ->limit(8)
+            ->get();
     }
 }
