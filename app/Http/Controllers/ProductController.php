@@ -30,4 +30,7 @@ class ProductController extends Controller
     public function deleteProduct(Request $request) {
         return Product::destroy($request);
     }
+    public function checkProduct(Request $request) {
+        return Product::checkProduct($request);
+    }
 }

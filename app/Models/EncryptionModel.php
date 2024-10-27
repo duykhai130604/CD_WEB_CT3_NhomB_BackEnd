@@ -12,7 +12,7 @@ class EncryptionModel extends Model
      * @param string $encodedId
      * @return int|null
      */
-    public static function decodeProductId($encodedId)
+    public static function decodeId($encodedId)
     {
         $secretString = env('PRODUCT_SECRET_STRING');
         $decodedId = base64_decode($encodedId, true);
@@ -32,7 +32,7 @@ class EncryptionModel extends Model
      * @param int $productId
      * @return string
      */
-    public static function encodeProductId($productId)
+    public static function encodeId($productId)
     {
         $secretString = env('PRODUCT_SECRET_STRING');
         return base64_encode($productId . $secretString);
