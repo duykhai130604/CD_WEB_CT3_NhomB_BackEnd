@@ -33,10 +33,7 @@ class ProductCategory extends Model
     public static function updateProductCategories($productId, $categories)
     {
         try {
-            // Xóa tất cả danh mục hiện tại của sản phẩm
             DB::table('product_category')->where('product_id', $productId)->delete();
-
-            // Thêm lại các danh mục mới
             foreach ($categories as $categoryId) {
                 DB::table('product_category')->insert([
                     'product_id' => $productId,
@@ -54,7 +51,7 @@ class ProductCategory extends Model
     }
     public static function getProductCategories($request)
     {
-        $productId = EncryptionModel::decodeProductId($request->encodeId);
+        $productId = EncryptionModel::decodeId($request->encodeId);
         try {
             $categories = DB::table('product_category')
                 ->where('product_id', $productId)
