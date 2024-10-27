@@ -50,21 +50,20 @@ class BlogController extends Controller
         return response()->json($blog, 201);
     }
 
-    public function updateBlog(Request $request, $encryptedId)
+    public function updateBlog(Request $request, $encryptedId) 
     {
         try {
-            $decryptedId = Crypt::decrypt($encryptedId);
+            $decryptedId = Crypt::decrypt($encryptedId);          
             if (!is_numeric($decryptedId) || intval($decryptedId) <= 0) {
                 return response()->json(['error' => 'Invalid ID format.'], 400);
-            }
-
+            }      
             $validatedData = $request->validate([
                 'title' => 'required|string|max:255',
                 'content' => 'required|string',
                 'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
                 'user_id' => 'required|integer',
             ]);
-            //hàm này phải gọi từ model
+
             $blog = Blog::findOrFail($decryptedId);
             $blog->update($validatedData);
             return response()->json($blog);
@@ -74,7 +73,6 @@ class BlogController extends Controller
             return response()->json(['error' => 'Blog not found.'], 404);
         }
     }
-
     public function deleteBlog($encryptedId)
     {
         try {
@@ -90,7 +88,6 @@ class BlogController extends Controller
             return response()->json(['error' => 'Blog not found.'], 404);
         }
     }
-
     public function changeBlogStatus($encryptedId)
     {
         try {
@@ -106,7 +103,6 @@ class BlogController extends Controller
             return response()->json(['error' => 'Blog not found.'], 404);
         }
     }
-
     public function getAllBlogs()
     {
         $blogs = Blog::getAllBlogs();
