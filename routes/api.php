@@ -53,7 +53,7 @@ Route::get('/category/{id}', [CategoryController::class, 'getCategoryById']);
 Route::post('/add-category', [CategoryController::class, 'addCategory']);
 Route::post('/update-category', [CategoryController::class, 'updateCategory']);
 Route::put('/category/change-status/{id}', [CategoryController::class, 'changeCategory']);
-Route::delete('/delete-category/{id}', [CategoryController::class, 'deleteCategory']);
+Route::delete('/delete-category/{id}', [CategoryController::class, 'changeCategory']);
 Route::get('/categories/parent', [CategoryController::class, 'getParentCategories']);
 Route::post('/category/check-assets', [CategoryController::class, 'checkCategoryAssets']);
 Route::get('/category-childs/{id}', [CategoryController::class, 'getCategoryByParentId']);
@@ -79,7 +79,7 @@ Route::post('/add-blog', [BlogController::class, 'addBlog']);
 Route::get('/authors-count-blog', [BlogController::class, 'getAuthorsWithCountBlog']);
 Route::post('/update-blog', [BlogController::class, 'updateBlog']);
 Route::put('/blog/change-status/{id}', [BlogController::class, 'changeBlog']);
-Route::delete('/delete-blog/{id}', [BlogController::class, 'deleteBlog']);
+Route::delete('/delete-blog/{id}', [BlogController::class, 'changeBlogStatus']);
 Route::get('/get-authorname', [BlogController::class, 'getNameUserByIds']);
 Route::get('/get-blog-by-author/{id}', [BlogController::class, 'getBlogsByAuthorId']);
 
@@ -92,3 +92,5 @@ Route::post('/upload-images', function (Request $request) {
     // Trả về kết quả
     return response()->json($response);
 });
+// track users
+Route::get('/top-products', [ProductController::class, 'getTopProducts']);

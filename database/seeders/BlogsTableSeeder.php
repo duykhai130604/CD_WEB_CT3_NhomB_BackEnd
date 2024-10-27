@@ -20,6 +20,7 @@ class BlogsTableSeeder extends Seeder
                 'content' => 'Khám phá những xu hướng thời trang mới nhất cho mùa hè năm 2024, từ màu sắc đến kiểu dáng.',
                 'thumbnail' => 'https://res.cloudinary.com/dkfedhd63/image/upload/f_auto,q_auto/jdncwcjuu8efohov113k',
                 'user_id' => 1,
+                'status' => 1,
                 'created_at' => '2024-10-01 03:00:00',
                 'updated_at' => '2024-10-01 03:30:00'
             ],
@@ -28,6 +29,7 @@ class BlogsTableSeeder extends Seeder
                 'content' => 'Những gợi ý phối đồ đi biển hoàn hảo để bạn tự tin tỏa sáng trong mùa hè này.',
                 'thumbnail' => 'https://res.cloudinary.com/dkfedhd63/image/upload/f_auto,q_auto/nx3kxtrr1jhaplkebwuq',
                 'user_id' => 2,
+                'status' => 1,
                 'created_at' => '2024-10-02 04:00:00',
                 'updated_at' => '2024-10-02 04:15:00'
             ],

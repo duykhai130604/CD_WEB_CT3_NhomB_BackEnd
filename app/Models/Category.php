@@ -46,6 +46,7 @@ class Category extends Model
     {
         $category = self::findOrFail($id);
         $category->status = $status;
+        $category->deleted_at = now();
         $category->save();
         return $category;
     }

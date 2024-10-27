@@ -98,11 +98,8 @@ class BlogController extends Controller
             if (!is_numeric($decryptedId) || intval($decryptedId) <= 0) {
                 return response()->json(['error' => 'Invalid ID format.'], 400);
             }
-            //hàm này phải gọi từ model
-            $blog = Blog::findOrFail($decryptedId);
-            $blog->status = ($blog->status === 1) ? 0 : 1;
-            $blog->save();
-            return response()->json($blog);
+            Blog::changeBlogStatus($decryptedId);
+            return response()->json("success", 200);
         } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
             return response()->json(['error' => 'Invalid or corrupted ID.'], 400);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {

@@ -19,6 +19,7 @@ return new class extends Migration
         $table->integer('status');
         $table->integer('user_id');
         $table->timestamps();
+        $table->timestamp('deleted_at')->nullable()->useCurrent();
     });
 }
 

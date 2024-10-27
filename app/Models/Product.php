@@ -258,10 +258,22 @@ class Product extends Model
     }
     public static function getProductsByCategory($categoryId)
     {
-        return self::select('products.*')
+      $products =  self::select('products.*')
             ->join('product_category', 'products.id', '=', 'product_category.product_id')
             ->join('categories', 'product_category.category_id', '=', 'categories.id')
             ->where('categories.id', $categoryId)
+            ->get();
+            return $products->isEmpty() ? null : $products;
+    }
+    public static function getTopProducts()
+    {
+        return self::select('products.*')
+            ->join('behaviors', 'products.id', '=', 'behaviors.product_id')
+            ->whereIn('behaviors.action', ['click', 'follow'])
+            ->selectRaw('count(behaviors.id) as action_count')
+            ->groupBy('products.id')
+            ->orderByDesc('action_count')
+            ->limit(8)
             ->get();
     }
 }
