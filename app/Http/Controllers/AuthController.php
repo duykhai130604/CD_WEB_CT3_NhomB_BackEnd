@@ -14,19 +14,19 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {
-        
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
-    
+
         // Lưu avatar nếu có
         if ($request->hasFile('avatar')) {
             $avatarPath = $request->file('avatar')->store('avatars', 'public');
         }
-    
+
         // Tạo người dùng mới
         $user = User::create([
             'name' => $request->name,
@@ -34,35 +34,33 @@ class AuthController extends Controller
             'password' => bcrypt($request->password),
             'avatar' => $avatarPath ?? null
         ]);
-    
+
         // Tạo JWT token
         $token = JWTAuth::fromUser($user);
-    
+
         return response()->json(['token' => $token]);
     }
     public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
-        $user = $request->validate(['email' => 'required',
-                                            'password' => 'required']);   
+        $user = $request->validate([
+            'email' => 'required',
+            'password' => 'required'
+        ]);
         $user = User::where('email', $request->email)->first();
-        session::put('id',$user->id);
-                session('login');
-                $request->session()->put('login.user_id', $user->id);   
         try {
             if (!$token = JWTAuth::attempt($credentials)) {
                 return response()->json(['error' => 'Invalid credentials'], 401);
             }
             // Retrieve user ID
             $user = JWTAuth::user();
-            $userId = $user->id;
+            $user->id;
         } catch (JWTException $e) {
             return response()->json(['error' => 'Could not create token'], 500);
         }
         return response()->json(['token' => $token]);
-       // return redirect()->route('home')->with('user_id', $userId);
     }
-   
+
     public function logout()
     {
         try {
@@ -96,5 +94,25 @@ class AuthController extends Controller
         // Trả về phản hồi thành công
         return response()->json(['message' => 'User updated successfully']);
     }
+    public function getUserId(Request $request)
+    {
+        $token = $request->bearerToken(); 
+    
+        if (!$token) {
+            return response()->json(['error' => 'Token not provided'], 401);
+        }
+    
+        try {
+            // Xác thực token và lấy payload
+            $payload = JWTAuth::setToken($token)->getPayload();
+            $userId = $payload['sub']; 
+            $user = User::find($userId);
+            return response()->json(['user_id' => $user->id,'user_name' => $user->name]);
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Token is invalid'], 401);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+    }
+    
 }
-

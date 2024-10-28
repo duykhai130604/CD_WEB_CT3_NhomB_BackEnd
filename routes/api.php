@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Crypt;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ColorController;
 use App\Http\Controllers\ProductVariantController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SizeController;
 use App\Models\CloudinaryModel;
 
@@ -27,7 +28,7 @@ use App\Models\CloudinaryModel;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
@@ -80,7 +81,7 @@ Route::post('/update-product-category-and-parent', [CategoryController::class, '
 //Reset password
 Route::post('/reset', [AuthController::class, 'reset']);
 Route::post('register', [AuthController::class, 'register']);
-Route::post('login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api');
 
 //CRUD BLOG
@@ -116,3 +117,6 @@ Route::get('/top-products/{userId}', [ProductController::class, 'getTopProductsB
 Route::get('/user-top-products/{userId}', [ProductController::class, 'getTopProductsByUserInteracted']);
 //đề xuất sản phẩm tương tự
 Route::get('/products/similar/{id}', [ProductController::class, 'getProductsBySimilarNameAndCategory']);
+
+Route::get('/get-user', [AuthController::class, 'getUserId']);
+

@@ -6,6 +6,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Validator;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class ProductController extends Controller
 {
@@ -65,7 +66,7 @@ class ProductController extends Controller
       public function getProductsBySimilarNameAndCategory($id)
       {
           $products = Product::getProductsBySimilarNameAndCategory($id);
-  
-          return response()->json($products); 
+
+          return response()->json($products, ); 
       }
 }
