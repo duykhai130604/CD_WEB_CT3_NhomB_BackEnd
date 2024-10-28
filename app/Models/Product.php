@@ -280,13 +280,14 @@ class Product extends Model
     }
     public static function getProductsByCategory($categoryId)
     {
-      $products =  self::select('products.*')
+        $products =  self::select('products.*')
             ->join('product_category', 'products.id', '=', 'product_category.product_id')
             ->join('categories', 'product_category.category_id', '=', 'categories.id')
             ->where('categories.id', $categoryId)
             ->get();
-            return $products->isEmpty() ? null : $products;
+        return $products->isEmpty() ? null : $products;
     }
+    // Lấy top sản phẩm khic chưa đăng nhập
     public static function getTopProducts()
     {
         return self::select('products.*')
@@ -297,5 +298,87 @@ class Product extends Model
             ->orderByDesc('action_count')
             ->limit(8)
             ->get();
+    }
+    // gần giống với đã tương tác
+    public static function getTopProductsByUserNotInteracted($userId)
+    {
+        return self::select('products.*')
+            ->join('behaviors', 'products.id', '=', 'behaviors.product_id')
+            ->join('product_category as pc_user', 'pc_user.product_id', '=', 'products.id')
+            ->join('product_category as pc_similar', 'pc_user.category_id', '=', 'pc_similar.category_id')
+            ->join('products as similar_products', 'similar_products.id', '=', 'pc_similar.product_id')
+            ->where('behaviors.user_id', $userId)
+            ->whereIn('behaviors.action', ['click', 'follow'])
+            ->where('similar_products.id', '!=', 'products.id')
+            ->select('similar_products.*')
+            ->selectRaw('count(behaviors.id) as action_count')
+            ->groupBy('similar_products.id')
+            ->orderByDesc('action_count')
+            ->limit(16)
+            ->get();
+    }
+    /* Lấy top sản phẩm mà user chưa tương tác hoặc chưa 
+    có user_id, sắp xếp ngẫu nhiên để tránh trùng lặp sản phẩm*/
+    public static function getTopProductsByUserInteracted($userId)
+    {
+        // Truy vấn các sản phẩm liên quan dựa trên các sản phẩm mà user đã tương tác
+        $relatedProducts = self::select('similar_products.*', DB::raw('NULL as interaction_count'))
+            ->join('behaviors', 'products.id', '=', 'behaviors.product_id')
+            ->leftJoin('product_category as pc_user', 'pc_user.product_id', '=', 'products.id')
+            ->leftJoin('product_category as pc_similar', 'pc_user.category_id', '=', 'pc_similar.category_id')
+            ->leftJoin('products as similar_products', 'similar_products.id', '=', 'pc_similar.product_id')
+            ->whereIn('behaviors.action', ['click', 'follow'])
+            ->where('behaviors.user_id', $userId)
+            ->whereNotNull('similar_products.id')
+            ->whereNotNull('similar_products.name')
+            ->whereNotNull('similar_products.price')
+            ->distinct();
+        // Truy vấn các sản phẩm có lượt tương tác cao từ tất cả các user
+        $popularProducts = self::select('products.*', DB::raw('COUNT(behaviors.id) as interaction_count'))
+            ->join('behaviors', 'products.id', '=', 'behaviors.product_id')
+            ->whereIn('behaviors.action', ['click', 'follow'])
+            ->groupBy('products.id')
+            ->orderByDesc('interaction_count')
+            ->limit(8);
+        // Kết hợp hai truy vấn
+        $combinedQuery = $relatedProducts->union($popularProducts);
+        // Lấy kết quả ngẫu nhiên và giới hạn
+        return $combinedQuery
+            ->orderByRaw('RAND()')
+            ->limit(16)
+            ->get();
+    }
+    public static function getProductsBySimilarNameAndCategory($productId)
+    {
+        $product = self::select('name')
+            ->where('id', $productId)
+            ->first();
+
+        if (!$product) {
+            return collect();
+        }
+
+        $productName = $product->name;
+        $keywords = explode(' ', $productName);
+        $categoryIds = DB::table('product_category')
+            ->where('product_id', $productId)
+            ->pluck('category_id');
+
+        if ($categoryIds->isEmpty()) {
+            return collect();
+        }
+        $categoryProducts = self::select('products.*', DB::raw('NULL AS interaction_count'))
+            ->join('product_category', 'products.id', '=', 'product_category.product_id')
+            ->whereIn('product_category.category_id', $categoryIds)
+            ->where('products.id', '!=', $productId)
+            ->distinct()
+            ->get();
+        $data = array();
+        foreach ($keywords as $keyword) {
+            $similarNameProducts = self::orWhere('products.name', 'LIKE', '%' . $keyword . '%')->distinct()->get();
+            array_push($data, $similarNameProducts);
+        }
+        array_push($data, $categoryProducts);
+        return $data;
     }
 }
