@@ -48,7 +48,7 @@ class Blog extends Model
           $blog->save();
         return $blog;
     }
-
+    
     public static function getAllBlogs()
     {
         return self::all();

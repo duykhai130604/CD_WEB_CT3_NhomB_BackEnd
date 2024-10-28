@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -11,6 +12,26 @@ use Illuminate\Support\Facades\Validator;
 class Product extends Model
 {
     use HasFactory;
+
+    use SoftDeletes;
+    public static function checkProduct($request)
+    {
+        $id = $request->input('id');  // Lấy `id` từ `request`
+        $decodedId = EncryptionModel::decodeId($id); // Giải mã ID nếu cần
+
+        // Kiểm tra sự tồn tại của sản phẩm
+        if (!DB::table('products')->where('id', $decodedId)->exists()) {
+            return response()->json([
+                'message' => 'Product not found',
+                'status' => 'error'
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Product exists',
+            'status' => 'success'
+        ]);
+    }
     public function categories()
     {
         return $this->belongsToMany(Category::class, 'product_category', 'product_id', 'category_id');
@@ -25,7 +46,7 @@ class Product extends Model
     public static function getProductDetails($request)
     {
         $encodedId = $request->input('encodedId');
-        $productId = EncryptionModel::decodeProductId($encodedId);
+        $productId = EncryptionModel::decodeId($encodedId);
         $product = Product::find($productId);
         if (!$product) {
             return response()->json(['status' => 'error', 'message' => 'Product not found'], 404);
@@ -54,7 +75,7 @@ class Product extends Model
         }
         $responseData = $products->getCollection()->map(function ($product) {
             return [
-                'id' => EncryptionModel::encodeProductId($product->id),
+                'id' => EncryptionModel::encodeId($product->id),
                 'name' => $product->name,
                 'desc' => $product->desc,
                 'category_id' => $product->category_id,
@@ -82,22 +103,24 @@ class Product extends Model
             'name.regex' => 'The name only includes a-z, A-Z, 0-9, the length must be between 3 and 255 characters',
             'name.min' => 'The name only includes a-z, A-Z, 0-9, the length must be between 3 and 255 characters',
             'name.max' => 'The name only includes a-z, A-Z, 0-9, the length must be between 3 and 255 characters',
+
             'price.required' => 'Required field',
-            'price.integer' => 'Price must be a integer greater than 0 and up to 12 digits',
-            'price.min' => 'Price must be a integer greater than 0 and up to 12 digits',
-            'price.digits_between' => 'Price must be a integer greater than 0 and up to 12 digits',
+            'price.regex' => 'Price must be a integer greater than 0 and up to 12 digits',
+
             'discount.integer' => 'Discount must be a integer and 0 < Discount < 101',
             'discount.between' => 'Discount must be a integer and 0 < Discount < 101',
+
             'categories.required' => 'Required field',
             'categories.array' => 'Categories must be an array',
+
             'desc.required' => 'Required field',
-            'desc.max' => 'The length of description must be between 1 and 2000 characters'
+            'desc.max' => 'The length of description must be between 1 and 2000 characters',
         ];
 
         $validator = Validator::make($request->all(), [
             'name' => 'required|regex:/^[\p{L}\p{N} ]+$/u|min:3|max:255',
-            'price' => 'required|integer|min:1|digits_between:1,12',
-            'discount' => 'nullable|integer|between:0,101',
+            'price' => 'required|regex:/^[1-9]\d{0,11}$/',
+            'discount' => 'nullable|integer|between:0,100',
             'categories' => 'required|array|exists:categories,id',
             'desc' => 'required|max:2000',
         ], $messages);
@@ -111,6 +134,7 @@ class Product extends Model
                 'categories' => $errors->first('categories'),
                 'desc' => $errors->first('desc'),
             ];
+
             return response()->json([
                 'status' => 'error',
                 'errors' => $formattedErrors
@@ -118,24 +142,22 @@ class Product extends Model
         }
 
         try {
-            // Tạo sản phẩm mới
             $product = new self();
             $product->name = $request->name;
             $product->price = $request->price;
-            $product->discount = $request->discount ?? 0;
+            $product->discount = $request->discount;
             $product->desc = $request->desc;
             $product->status = $request->status ?? 1;
             $product->created_at = now();
             $product->updated_at = now();
             $product->save();
 
-            // Gọi hàm thêm danh mục cho sản phẩm vào bảng product_category
             ProductCategory::addProductCategories($product->id, $request->categories);
 
             return response()->json([
                 'status' => 'success',
                 'message' => 'Product added successfully',
-                'product' => $product
+
             ], 201);
         } catch (\Exception $e) {
             return response()->json([
@@ -195,7 +217,7 @@ class Product extends Model
         }
 
         try {
-            $id = EncryptionModel::decodeProductId($request->id);
+            $id = EncryptionModel::decodeId($request->id);
             $product = self::find($id);
             if (!$product || $product->status == 0) {
                 return response()->json([
@@ -235,7 +257,7 @@ class Product extends Model
      */
     public static function destroy($request)
     {
-        $id = EncryptionModel::decodeProductId($request->id);
+        $id = EncryptionModel::decodeId($request->id);
         $product = Product::find($id);
         if (!$product) {
             return response()->json([
@@ -247,7 +269,7 @@ class Product extends Model
         if ($productVariantCount > 0) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Cannot delete this product because it is being used in the product_variant table.'
+                'message' => 'Delete product unsuccessful'
             ], 400);
         }
         $product->delete();

@@ -11,7 +11,9 @@ use App\Http\Controllers\BlogController;
 
 use Illuminate\Support\Facades\Crypt;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ColorController;
 use App\Http\Controllers\ProductVariantController;
+use App\Http\Controllers\SizeController;
 use App\Models\CloudinaryModel;
 
 /*
@@ -29,6 +31,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+// PRODUCT
+Route::get('/checkProduct', [ProductController::class, 'checkProduct']);
 Route::get('/products', [ProductController::class, 'getAllProducts']);
 Route::get('/products-category/{id}', [ProductController::class, 'getProductByCategoryId']);
 Route::get('/getAllCategories', [CategoryController::class, 'getAllCategories']);
@@ -37,8 +41,14 @@ Route::post('/admin/editProduct',[ProductController::class,'editProduct']);
 Route::get('/getProductDetails', [ProductController::class, 'getProductDetails']);
 Route::delete('/admin/deleteProduct', [ProductController::class, 'deleteProduct']);
 Route::get('/admin/productVariants', [ProductVariantController::class, 'getAllProductVariants']);
-
 Route::get('/getCategoriesByProductId', [ProductCategoryController::class, 'getCategoriesByProductId']);
+
+// PRODUCT VARIANT
+Route::get('/getAllSizes',[SizeController::class, 'getAllSizes']);
+Route::get('/getAllColors',[ColorController::class, 'getAllColors']);
+Route::post('/admin/addProductVariant',[ProductVariantController::class,'addProductVariant']);
+Route::delete('/admin/deleteProductVariant', [ProductVariantController::class, 'deleteProductVariant']);
+
 // category manage
 Route::get('/categories', [CategoryController::class, 'getCategoriesByPage']);
 
@@ -67,6 +77,8 @@ Route::post('/update-product-category-and-parent', [CategoryController::class, '
 // Route::get('/register', [RegisterController::class, 'showRegisterForm'])->name('register');
 // Route::post('/register', [RegisterController::class, 'register'])->name('register.post');
 //LOGIN,REGISTER
+//Reset password
+Route::post('/reset', [AuthController::class, 'reset']);
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api');
@@ -83,11 +95,15 @@ Route::delete('/delete-blog/{id}', [BlogController::class, 'changeBlogStatus']);
 Route::get('/get-authorname', [BlogController::class, 'getNameUserByIds']);
 Route::get('/get-blog-by-author/{id}', [BlogController::class, 'getBlogsByAuthorId']);
 
-//Images
-Route::post('/upload-images', function (Request $request) {
+// sửa profile
+Route::middleware('auth:sanctum')->put('/profile', [ProfileController::class, 'update']);
 
+// //Images
+Route::post('/delete-image', function (Request $request) {
+
+    $public_id = $request->public_id;
     // Gọi hàm uploadImage từ service hoặc trực tiếp
-    $response = CloudinaryModel::uploadImage($request->file('images'));
+    $response = CloudinaryModel::deleteImage($public_id);
 
     // Trả về kết quả
     return response()->json($response);

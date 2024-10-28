@@ -13,4 +13,13 @@ class ProductVariantController extends Controller
         return ProductVariantModel::getAllVariantsByProductId($request);
     }
 
+    public function addProductVariant(Request $request)
+    {
+        return ProductVariantModel::addProductVariantWithImages($request);
+    }
+
+    public function deleteProductVariant(Request $request){
+        return ProductVariantModel::deleteProductVariantWithImages($request);
+    }
+
 }
