@@ -16,17 +16,14 @@ class Product extends Model
     use SoftDeletes;
     public static function checkProduct($request)
     {
-        $id = $request->input('id');  // Lấy `id` từ `request`
-        $decodedId = EncryptionModel::decodeId($id); // Giải mã ID nếu cần
-
-        // Kiểm tra sự tồn tại của sản phẩm
+        $id = $request->input('id');
+        $decodedId = EncryptionModel::decodeId($id);
         if (!DB::table('products')->where('id', $decodedId)->exists()) {
             return response()->json([
                 'message' => 'Product not found',
                 'status' => 'error'
             ]);
         }
-
         return response()->json([
             'message' => 'Product exists',
             'status' => 'success'

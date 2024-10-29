@@ -48,7 +48,8 @@ Route::get('/getAllSizes',[SizeController::class, 'getAllSizes']);
 Route::get('/getAllColors',[ColorController::class, 'getAllColors']);
 Route::post('/admin/addProductVariant',[ProductVariantController::class,'addProductVariant']);
 Route::delete('/admin/deleteProductVariant', [ProductVariantController::class, 'deleteProductVariant']);
-
+Route::post('/admin/editProductVariant',[ProductVariantController::class,'editProductVariant']);
+Route::get('/getVariantByVariantId',[ProductVariantController::class, 'getVariantByVariantId']);
 // category manage
 Route::get('/categories', [CategoryController::class, 'getCategoriesByPage']);
 
