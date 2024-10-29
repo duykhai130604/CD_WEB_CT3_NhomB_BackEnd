@@ -13,11 +13,6 @@ class Blog extends Model
     {
         return self::orderBy('created_at', 'desc')->paginate($perPage);
     }
-    public static function getBlogsByUserPage($perPage )
-    {
-        return self::orderBy('created_at', 'desc')->paginate($perPage);
-    }
-
     public static function getBlogById($id)
     {
         return self::findOrFail($id);

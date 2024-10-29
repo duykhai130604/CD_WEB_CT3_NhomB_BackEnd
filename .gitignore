@@ -19,3 +19,4 @@ yarn-error.log
 /nginx
 /Dockerfile
 /docker-compose.yml
+/docker
