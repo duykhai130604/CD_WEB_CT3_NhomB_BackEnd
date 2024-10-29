@@ -26,4 +26,19 @@ class ProductImageModel extends Model
             return ['status' => 'error', 'message' => 'Failed to add product image.'];
         }
     }
+    public static function getImagesByVariantId($variantId)
+    {
+        // Lấy tất cả các hình ảnh của biến thể theo ID
+        return DB::table('product_images')
+            ->where('variant_id', $variantId)
+            ->select('public_id')
+            ->get();
+    }
+    public static function deleteImagesByVariantId($variantId)
+    {
+        // Xóa các hình ảnh theo ID biến thể
+        return DB::table('product_images')
+            ->where('variant_id', $variantId)
+            ->delete();
+    }
 }
