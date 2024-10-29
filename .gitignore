@@ -17,6 +17,4 @@ yarn-error.log
 /.idea
 /.vscode
 /nginx
-/Dockerfile
 /docker-compose.yml
-/docker

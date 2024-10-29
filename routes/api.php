@@ -41,6 +41,13 @@ Route::delete('/admin/deleteProduct', [ProductController::class, 'deleteProduct'
 Route::get('/admin/productVariants', [ProductVariantController::class, 'getAllProductVariants']);
 
 Route::get('/getCategoriesByProductId', [ProductCategoryController::class, 'getCategoriesByProductId']);
+
+// PRODUCT VARIANT
+// Route::get('/getAllSizes',[SizeController::class, 'getAllSizes']);
+// Route::get('/getAllColors',[ColorController::class, 'getAllColors']);
+// Route::post('/admin/addProductVariant',[ProductVariantController::class,'addProductVariant']);
+// Route::delete('/admin/deleteProductVariant', [ProductVariantController::class, 'deleteProductVariant']);
+
 // category manage
 Route::get('/categories', [CategoryController::class, 'getCategoriesByPage']);
 
@@ -91,3 +98,5 @@ Route::post('/upload-images', function (Request $request) {
     // Trả về kết quả
     return response()->json($response);
 });
+// track users
+Route::get('/top-products', [ProductController::class, 'getTopProducts']);
