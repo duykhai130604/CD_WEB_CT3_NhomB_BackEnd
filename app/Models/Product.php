@@ -61,31 +61,52 @@ class Product extends Model
      */
     public static function getAllProducts($request)
     {
-        $keyword = $request->input('keyword');
-        $productsQuery = self::query();
-        if ($keyword) {
-            $productsQuery->where('name', 'like', '%' . $keyword . '%');
+        try {
+            $keyword = $request->input('keyword');
+            $productsQuery = self::query();
+
+            if ($keyword) {
+                $productsQuery->where('name', 'like', '%' . $keyword . '%');
+            }
+
+            $products = $productsQuery->orderBy('updated_at', 'desc')->paginate(10);
+
+            if ($products->isEmpty()) {
+                return response()->json([
+                    'status' => 'error',
+                    'code' => 422,
+                    'message' => 'Product Not Found',
+                    'errors' => []
+                ]);
+            }
+
+            $responseData = $products->getCollection()->map(function ($product) {
+                return [
+                    'id' => EncryptionModel::encodeId($product->id),
+                    'name' => $product->name,
+                    'desc' => $product->desc,
+                    'category_id' => $product->category_id,
+                    'price' => $product->price,
+                    'discount' => $product->discount,
+                    'status' => $product->status,
+                    'created_at' => $product->created_at,
+                    'updated_at' => $product->updated_at,
+                ];
+            });
+
+            $products->setCollection($responseData);
+
+            return response()->json($products);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'code' => 422,
+                'message' => 'System error, please try again later',
+                'errors' => []
+            ], 422);
         }
-        $products = $productsQuery->orderBy('updated_at', 'desc')->paginate(10);
-        if ($products->isEmpty()) {
-            return response()->json(['message' => 'Product Not Found']);
-        }
-        $responseData = $products->getCollection()->map(function ($product) {
-            return [
-                'id' => EncryptionModel::encodeId($product->id),
-                'name' => $product->name,
-                'desc' => $product->desc,
-                'category_id' => $product->category_id,
-                'price' => $product->price,
-                'discount' => $product->discount,
-                'status' => $product->status,
-                'created_at' => $product->created_at,
-                'updated_at' => $product->updated_at,
-            ];
-        });
-        $products->setCollection($responseData);
-        return response()->json($products);
     }
+
 
     /**
      * Thêm sản phẩm mới vào cơ sở dữ liệu.
@@ -112,6 +133,9 @@ class Product extends Model
 
             'desc.required' => 'Required field',
             'desc.max' => 'The length of description must be between 1 and 2000 characters',
+
+            'image.required' => 'Image is required',
+            'image.image' => 'The file must be an image'
         ];
 
         $validator = Validator::make($request->all(), [
@@ -120,6 +144,7 @@ class Product extends Model
             'discount' => 'nullable|integer|between:0,100',
             'categories' => 'required|array|exists:categories,id',
             'desc' => 'required|max:2000',
+            'image' => 'required|image'
         ], $messages);
 
         if ($validator->fails()) {
@@ -130,6 +155,7 @@ class Product extends Model
                 'discount' => $errors->first('discount'),
                 'categories' => $errors->first('categories'),
                 'desc' => $errors->first('desc'),
+                'image' => $errors->first('image'),
             ];
 
             return response()->json([
@@ -139,12 +165,23 @@ class Product extends Model
         }
 
         try {
+            // Upload ảnh và lấy URL cùng public_id
+            $uploadResult = CloudinaryModel::uploadImage($request->file('image'));
+            if ($uploadResult['status'] !== 'success') {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $uploadResult['message']
+                ], 500);
+            }
+
             $product = new self();
             $product->name = $request->name;
             $product->price = $request->price;
             $product->discount = $request->discount;
             $product->desc = $request->desc;
             $product->status = $request->status ?? 1;
+            $product->thumbnail = $uploadResult['secure_url'];
+            $product->public_id = $uploadResult['public_id'];
             $product->created_at = now();
             $product->updated_at = now();
             $product->save();
@@ -154,7 +191,6 @@ class Product extends Model
             return response()->json([
                 'status' => 'success',
                 'message' => 'Product added successfully',
-
             ], 201);
         } catch (\Exception $e) {
             return response()->json([
@@ -163,6 +199,7 @@ class Product extends Model
             ], 500);
         }
     }
+
 
     /**
      * Cập nhật thông tin sản phẩm đã tồn tại trong cơ sở dữ liệu.
@@ -187,15 +224,17 @@ class Product extends Model
             'categories.required' => 'Required field',
             'categories.array' => 'Categories must be an array',
             'desc.required' => 'Required field',
-            'desc.max' => 'The length of description must be between 1 and 2000 characters'
+            'desc.max' => 'The length of description must be between 1 and 2000 characters',
+            'image.image' => 'The file must be an image' // Thêm kiểm tra cho ảnh mới
         ];
 
         $validator = Validator::make($request->all(), [
             'name' => 'required|regex:/^[\p{L}\p{N} ]+$/u|min:3|max:255',
             'price' => 'required|integer|min:1|digits_between:1,12',
-            'discount' => 'nullable|integer|between:0,101',
+            'discount' => 'nullable|integer|between:0,100',
             'categories' => 'required|array|exists:categories,id',
             'desc' => 'required|max:2000',
+            'image' => 'nullable|image' // Ảnh là tùy chọn, nếu có thì phải là ảnh
         ], $messages);
 
         if ($validator->fails()) {
@@ -206,6 +245,7 @@ class Product extends Model
                 'discount' => $errors->first('discount'),
                 'categories' => $errors->first('categories'),
                 'desc' => $errors->first('desc'),
+                'image' => $errors->first('image'),
             ];
             return response()->json([
                 'status' => 'error',
@@ -223,11 +263,37 @@ class Product extends Model
                 ], 404);
             }
 
+            // Cập nhật thông tin sản phẩm
             $product->name = $request->name;
             $product->price = $request->price;
             $product->discount = $request->discount ?? 0;
             $product->desc = $request->desc;
             $product->status = $request->status ?? 1;
+
+            // Xóa ảnh cũ nếu có ảnh mới được gửi lên
+            if ($request->hasFile('image')) {
+                // Xóa ảnh cũ từ Cloudinary
+                $deleteResult = CloudinaryModel::deleteImage($product->public_id);
+                if ($deleteResult['status'] !== 'success') {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => $deleteResult['message']
+                    ], 500);
+                }
+
+                // Tải ảnh mới lên và lưu URL
+                $uploadResult = CloudinaryModel::uploadImage($request->file('image'));
+                if ($uploadResult['status'] !== 'success') {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => $uploadResult['message']
+                    ], 500);
+                }
+
+                $product->thumbnail = $uploadResult['secure_url'];
+                $product->public_id = $uploadResult['public_id'];
+            }
+
             $product->updated_at = now();
             $product->save();
 
@@ -246,6 +312,7 @@ class Product extends Model
         }
     }
 
+
     /**
      * Xóa sản phẩm khỏi cơ sở dữ liệu.
      *
@@ -256,33 +323,53 @@ class Product extends Model
     {
         $id = EncryptionModel::decodeId($request->id);
         $product = Product::find($id);
+
         if (!$product) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Product not found.'
+                'code' => 404,
+                'message' => 'Product not found.',
+                'errors' => []
             ], 404);
         }
+
         $productVariantCount = DB::table('product_variants')->where('product_id', $id)->count();
         if ($productVariantCount > 0) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Delete product unsuccessful'
+                'code' => 400,
+                'message' => 'Delete product unsuccessful',
+                'errors' => []
             ], 400);
         }
-        $product->delete();
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Product deleted successfully.'
-        ]);
+
+        try {
+            $product->delete();
+
+            return response()->json([
+                'status' => 'success',
+                'code' => 200,
+                'message' => 'Product deleted successfully.'
+            ]);
+        } catch (\Exception $e) {
+            // Xử lý lỗi hệ thống
+            return response()->json([
+                'status' => 'error',
+                'code' => 500,
+                'message' => 'System error, please try again later.',
+                'errors' => []
+            ], 500);
+        }
     }
+
     public static function getProductsByCategory($categoryId)
     {
-      $products =  self::select('products.*')
+        $products =  self::select('products.*')
             ->join('product_category', 'products.id', '=', 'product_category.product_id')
             ->join('categories', 'product_category.category_id', '=', 'categories.id')
             ->where('categories.id', $categoryId)
             ->get();
-            return $products->isEmpty() ? null : $products;
+        return $products->isEmpty() ? null : $products;
     }
     public static function getTopProducts()
     {
