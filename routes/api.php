@@ -99,16 +99,6 @@ Route::get('/get-blog-by-author/{id}', [BlogController::class, 'getBlogsByAuthor
 // sửa profile
 Route::middleware('auth:sanctum')->put('/profile', [ProfileController::class, 'update']);
 
-// //Images
-Route::post('/delete-image', function (Request $request) {
-
-    $public_id = $request->public_id;
-    // Gọi hàm uploadImage từ service hoặc trực tiếp
-    $response = CloudinaryModel::deleteImage($public_id);
-
-    // Trả về kết quả
-    return response()->json($response);
-});
 // track users
 Route::get('/top-products', [ProductController::class, 'getTopProducts']);
 // sản phẩm có thể biết
