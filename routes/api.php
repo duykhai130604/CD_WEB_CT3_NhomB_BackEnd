@@ -51,7 +51,8 @@ Route::get('/getAllSizes',[SizeController::class, 'getAllSizes']);
 Route::get('/getAllColors',[ColorController::class, 'getAllColors']);
 Route::post('/admin/addProductVariant',[ProductVariantController::class,'addProductVariant']);
 Route::delete('/admin/deleteProductVariant', [ProductVariantController::class, 'deleteProductVariant']);
-
+Route::post('/admin/editProductVariant',[ProductVariantController::class,'editProductVariant']);
+Route::get('/getVariantByVariantId',[ProductVariantController::class, 'getVariantByVariantId']);
 // category manage
 Route::get('/categories', [CategoryController::class, 'getCategoriesByPage']);
 
@@ -120,3 +121,11 @@ Route::get('/products/similar/{id}', [ProductController::class, 'getProductsBySi
 
  Route::get('/get-user', [AuthController::class, 'getUserId']);
 
+// track users
+Route::get('/top-products', [ProductController::class, 'getTopProducts']);
+// sản phẩm có thể biết
+Route::get('/top-products/{userId}', [ProductController::class, 'getTopProductsByUser']);
+// sản phẩm đề xuất qua tracking
+Route::get('/user-top-products/{userId}', [ProductController::class, 'getTopProductsByUserInteracted']);
+//đề xuất sản phẩm tương tự
+Route::get('/products/similar/{id}', [ProductController::class, 'getProductsBySimilarNameAndCategory']);

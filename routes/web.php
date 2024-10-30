@@ -14,4 +14,3 @@ use App\Http\Controllers\RegisterController;
 |
 */
 
-

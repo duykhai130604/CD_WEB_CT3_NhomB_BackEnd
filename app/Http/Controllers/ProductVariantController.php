@@ -19,7 +19,13 @@ class ProductVariantController extends Controller
     }
 
     public function deleteProductVariant(Request $request){
-        return ProductVariantModel::deleteProductVariantWithImages($request);
+        return ProductVariantModel::deleteProductVariant($request);
     }
-
+    public function editProductVariant(Request $request)
+    {
+        return ProductVariantModel::editVariant($request);
+    }
+    public function getVariantByVariantId(Request $request) {
+     return ProductVariantModel::getVariantByVariantId($request);
+    }
 }
