@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -48,10 +47,20 @@ class AuthController extends Controller
     {
         $credentials = $request->only('email', 'password');
 
+        // $user = $request->validate(['email' => 'required',
+        //                                     'password' => 'required']);   
+        // $user = User::where('email', $request->email)->first();
+        // session::put('id',$user->id);
+        //         session('login');
+        //         $request->session()->put('login.user_id', $user->id);   
         try {
             if (!$token = JWTAuth::attempt($credentials)) {
                 return response()->json(['error' => 'Invalid credentials'], 401);
             }
+
+            // Retrieve user ID
+            // $user = JWTAuth::user();
+            // $userId = $user->id;
         } catch (JWTException $e) {
             return response()->json(['error' => 'Could not create token'], 500);
         }
@@ -89,7 +98,6 @@ class AuthController extends Controller
     {
         return response()->json($request->user());
     }
-
     public function reset(Request $request)
     {
         // Validate the request data
