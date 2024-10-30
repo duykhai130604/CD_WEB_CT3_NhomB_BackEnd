@@ -59,20 +59,18 @@ class AuthController extends Controller
         $cookie = cookie('token', $token, 60, null, null, false, true); // 60 phút, HTTP-only
         return response()->json(['message' => 'Logged in successfully', 'user' => auth()->user()])->cookie($cookie);
     }
-    public function me(Request $request) 
-{
-    $user = $request->attributes->get('user'); // Lấy người dùng từ middleware
-
-    if (!$user) {
-        return response()->json(['error' => 'User not authenticated'], 401);
+    public function me(Request $request)
+    {
+        $user = $request->attributes->get('user'); 
+        if (!$user) {
+            return response()->json(['error' => 'User not authenticated'], 401);
+        }
+        return response()->json([
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email
+        ]);
     }
-
-    return response()->json([
-        'id' => $user->id,
-        'name' => $user->name,
-        'email' => $user->email
-    ]);
-}
 
     public function logout()
     {
@@ -85,7 +83,6 @@ class AuthController extends Controller
     {
         $token = Auth::guard('api')->refresh();
         $cookie = cookie('token', $token, 60, '/', null, false, true);
-
         return response()->json(['message' => 'Token refreshed'])->withCookie($cookie);
     }
     public function user(Request $request)

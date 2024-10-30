@@ -296,8 +296,8 @@ class Product extends Model
             ->selectRaw('count(behaviors.id) as action_count')
             ->groupBy('products.id')
             ->orderByDesc('action_count')
-            ->limit(8)
-            ->get();
+            ->paginate(4);
+        
     }
     // gần giống với đã tương tác
     public static function getTopProductsByUserNotInteracted($userId)
@@ -314,15 +314,14 @@ class Product extends Model
             ->selectRaw('count(behaviors.id) as action_count')
             ->groupBy('similar_products.id')
             ->orderByDesc('action_count')
-            ->limit(16)
-            ->get();
+            ->paginate(4);
     }
     /* Lấy top sản phẩm mà user chưa tương tác hoặc chưa 
     có user_id, sắp xếp ngẫu nhiên để tránh trùng lặp sản phẩm*/
-    public static function getTopProductsByUserInteracted($userId)
+    public static function getTopProductsByUserInteracted($userId) 
     {
         // Truy vấn các sản phẩm liên quan dựa trên các sản phẩm mà user đã tương tác
-        $relatedProducts = self::select('similar_products.*', DB::raw('NULL as interaction_count'))
+        $relatedProducts = self::select('similar_products.id', 'similar_products.name', 'similar_products.price', DB::raw('NULL as interaction_count'))
             ->join('behaviors', 'products.id', '=', 'behaviors.product_id')
             ->leftJoin('product_category as pc_user', 'pc_user.product_id', '=', 'products.id')
             ->leftJoin('product_category as pc_similar', 'pc_user.category_id', '=', 'pc_similar.category_id')
@@ -331,23 +330,25 @@ class Product extends Model
             ->where('behaviors.user_id', $userId)
             ->whereNotNull('similar_products.id')
             ->whereNotNull('similar_products.name')
-            ->whereNotNull('similar_products.price')
-            ->distinct();
+            ->whereNotNull('similar_products.price');
+    
         // Truy vấn các sản phẩm có lượt tương tác cao từ tất cả các user
-        $popularProducts = self::select('products.*', DB::raw('COUNT(behaviors.id) as interaction_count'))
+        $popularProducts = self::select('products.id', 'products.name', 'products.price', DB::raw('COUNT(behaviors.id) as interaction_count'))
             ->join('behaviors', 'products.id', '=', 'behaviors.product_id')
             ->whereIn('behaviors.action', ['click', 'follow'])
-            ->groupBy('products.id')
-            ->orderByDesc('interaction_count')
-            ->limit(8);
-        // Kết hợp hai truy vấn
-        $combinedQuery = $relatedProducts->union($popularProducts);
-        // Lấy kết quả ngẫu nhiên và giới hạn
-        return $combinedQuery
-            ->orderByRaw('RAND()')
-            ->limit(16)
-            ->get();
+            ->groupBy('products.id', 'products.name', 'products.price') // Cần nhóm theo các trường đã chọn
+            ->orderByDesc('interaction_count');
+    
+        // Kết hợp hai truy vấn và loại bỏ các bản ghi trùng lặp theo id
+        $combinedQuery = $relatedProducts->union($popularProducts)
+            ->distinct() 
+            ->orderByRaw('RAND()'); 
+    
+        // Lấy kết quả và phân trang
+        return $combinedQuery->paginate(4);
     }
+    
+    
     public static function getProductsBySimilarNameAndCategory($productId)
     {
         $product = self::select('name')

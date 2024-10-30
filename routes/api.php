@@ -112,9 +112,9 @@ Route::post('/delete-image', function (Request $request) {
 // track users
 Route::get('/top-products', [ProductController::class, 'getTopProducts']);
 // sản phẩm có thể biết
-Route::get('/top-products/{userId}', [ProductController::class, 'getTopProductsByUser']);
+Route::get('/top-products-user-not', [ProductController::class, 'getTopProductsByUser']);
 // sản phẩm đề xuất qua tracking
-Route::get('/user-top-products/{userId}', [ProductController::class, 'getTopProductsByUserInteracted']);
+Route::get('/user-top-products', [ProductController::class, 'getTopProductsByUserInteracted']);
 //đề xuất sản phẩm tương tự
 Route::get('/products/similar/{id}', [ProductController::class, 'getProductsBySimilarNameAndCategory']);
 
