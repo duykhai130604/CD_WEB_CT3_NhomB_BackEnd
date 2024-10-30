@@ -98,3 +98,12 @@ Route::get('/get-blog-by-author/{id}', [BlogController::class, 'getBlogsByAuthor
 
 // sửa profile
 Route::middleware('auth:sanctum')->put('/profile', [ProfileController::class, 'update']);
+
+// track users
+Route::get('/top-products', [ProductController::class, 'getTopProducts']);
+// sản phẩm có thể biết
+Route::get('/top-products/{userId}', [ProductController::class, 'getTopProductsByUser']);
+// sản phẩm đề xuất qua tracking
+Route::get('/user-top-products/{userId}', [ProductController::class, 'getTopProductsByUserInteracted']);
+//đề xuất sản phẩm tương tự
+Route::get('/products/similar/{id}', [ProductController::class, 'getProductsBySimilarNameAndCategory']);

@@ -50,10 +50,10 @@ class BlogController extends Controller
         return response()->json($blog, 201);
     }
 
-    public function updateBlog(Request $request, $encryptedId) 
-    {
+    public function updateBlog(Request $request) 
+    {   
         try {
-            $decryptedId = Crypt::decrypt($encryptedId);          
+            $decryptedId = Crypt::decrypt($request->id);          
             if (!is_numeric($decryptedId) || intval($decryptedId) <= 0) {
                 return response()->json(['error' => 'Invalid ID format.'], 400);
             }      
@@ -64,7 +64,7 @@ class BlogController extends Controller
                 'user_id' => 'required|integer',
             ]);
 
-            $blog = Blog::findOrFail($decryptedId);
+            $blog = Blog::findOrFail((int)$decryptedId);
             $blog->update($validatedData);
             return response()->json($blog);
         } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
