@@ -2,31 +2,33 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Log;
+use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
-use Session;
+
 
 class AuthController extends Controller
 {
     public function register(Request $request)
     {
-        
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
-    
+
         // Lưu avatar nếu có
         if ($request->hasFile('avatar')) {
             $avatarPath = $request->file('avatar')->store('avatars', 'public');
         }
-    
+
         // Tạo người dùng mới
         $user = User::create([
             'name' => $request->name,
@@ -34,43 +36,58 @@ class AuthController extends Controller
             'password' => bcrypt($request->password),
             'avatar' => $avatarPath ?? null
         ]);
-    
+
         // Tạo JWT token
         $token = JWTAuth::fromUser($user);
-    
+
         return response()->json(['token' => $token]);
     }
+
+
     public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
-        $user = $request->validate(['email' => 'required',
-                                            'password' => 'required']);   
-        $user = User::where('email', $request->email)->first();
-        session::put('id',$user->id);
-                session('login');
-                $request->session()->put('login.user_id', $user->id);   
+
         try {
             if (!$token = JWTAuth::attempt($credentials)) {
                 return response()->json(['error' => 'Invalid credentials'], 401);
             }
-            // Retrieve user ID
-            $user = JWTAuth::user();
-            $userId = $user->id;
         } catch (JWTException $e) {
             return response()->json(['error' => 'Could not create token'], 500);
         }
-        return response()->json(['token' => $token]);
-       // return redirect()->route('home')->with('user_id', $userId);
+        // Thiết lập cookie HTTP-only với token JWT
+        $cookie = cookie('token', $token, 60, null, null, false, true); // 60 phút, HTTP-only
+        return response()->json(['message' => 'Logged in successfully', 'user' => auth()->user()])->cookie($cookie);
     }
-   
+    public function me(Request $request)
+    {
+        $user = $request->attributes->get('user'); 
+        if (!$user) {
+            return response()->json(['error' => 'User not authenticated'], 401);
+        }
+        return response()->json([
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email
+        ]);
+    }
+
     public function logout()
     {
-        try {
-            JWTAuth::invalidate(JWTAuth::getToken());
-            return response()->json(['message' => 'Successfully logged out']);
-        } catch (JWTException $e) {
-            return response()->json(['error' => 'Failed to log out, please try again.'], 500);
-        }
+        Auth::guard('api')->logout();
+        $cookie = cookie()->forget('token');
+
+        return response()->json(['message' => 'Logout successful'])->withCookie($cookie);
+    }
+    public function refresh()
+    {
+        $token = Auth::guard('api')->refresh();
+        $cookie = cookie('token', $token, 60, '/', null, false, true);
+        return response()->json(['message' => 'Token refreshed'])->withCookie($cookie);
+    }
+    public function user(Request $request)
+    {
+        return response()->json($request->user());
     }
 
     public function reset(Request $request)
@@ -97,4 +114,3 @@ class AuthController extends Controller
         return response()->json(['message' => 'User updated successfully']);
     }
 }
-

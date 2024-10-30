@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Crypt;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ColorController;
 use App\Http\Controllers\ProductVariantController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SizeController;
 use App\Models\CloudinaryModel;
 
@@ -27,9 +28,11 @@ use App\Models\CloudinaryModel;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+//Route::middleware(['auth:api'])->get('/get-user', [AuthController::class, 'getUserId']);
+
 
 // PRODUCT
 Route::get('/checkProduct', [ProductController::class, 'checkProduct']);
@@ -79,11 +82,11 @@ Route::post('/update-product-category-and-parent', [CategoryController::class, '
 // Route::post('/register', [RegisterController::class, 'register'])->name('register.post');
 //LOGIN,REGISTER
 //Reset password
-Route::post('/reset', [AuthController::class, 'reset']);
 Route::post('register', [AuthController::class, 'register']);
+Route::post('reset', [AuthController::class, 'reset']);
 Route::post('login', [AuthController::class, 'login']);
-Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api');
-
+Route::middleware('auth:api')->post('/logout', [AuthController::class, 'logout']);
+Route::middleware(['custom.auth'])->get('/me', [AuthController::class, 'me']);
 //CRUD BLOG
 Route::get('/blog/{id}', [BlogController::class, 'getBlogById']);
 Route::get('/blogs', [BlogController::class, 'getAllBlogs']);
@@ -98,6 +101,25 @@ Route::get('/get-blog-by-author/{id}', [BlogController::class, 'getBlogsByAuthor
 
 // sửa profile
 Route::middleware('auth:sanctum')->put('/profile', [ProfileController::class, 'update']);
+
+// //Images
+Route::post('/delete-image', function (Request $request) {
+    $public_id = $request->public_id;
+    // Gọi hàm uploadImage từ service hoặc trực tiếp
+    $response = CloudinaryModel::deleteImage($public_id);
+    // Trả về kết quả
+    return response()->json($response);
+});
+// track users
+Route::get('/top-products', [ProductController::class, 'getTopProducts']);
+// sản phẩm có thể biết
+Route::get('/top-products-user-not', [ProductController::class, 'getTopProductsByUser']);
+// sản phẩm đề xuất qua tracking
+Route::get('/user-top-products', [ProductController::class, 'getTopProductsByUserInteracted']);
+//đề xuất sản phẩm tương tự
+Route::get('/products/similar/{id}', [ProductController::class, 'getProductsBySimilarNameAndCategory']);
+
+ Route::get('/get-user', [AuthController::class, 'getUserId']);
 
 // track users
 Route::get('/top-products', [ProductController::class, 'getTopProducts']);
