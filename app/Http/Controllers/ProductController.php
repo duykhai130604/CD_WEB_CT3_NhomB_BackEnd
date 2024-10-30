@@ -28,7 +28,7 @@ class ProductController extends Controller
     {
         return Product::editProduct($request);
     }
-    
+
     public function deleteProduct(Request $request) {
         return Product::destroy($request);
     }

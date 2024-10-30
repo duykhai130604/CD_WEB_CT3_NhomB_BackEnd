@@ -88,12 +88,17 @@ Route::post('/update-blog', [BlogController::class, 'updateBlog']);
 Route::put('/blog/change-status/{id}', [BlogController::class, 'changeBlog']);
 Route::delete('/delete-blog/{id}', [BlogController::class, 'deleteBlog']);
 Route::get('/get-authorname', [BlogController::class, 'getNameUserByIds']);
+Route::get('/get-blog-by-author/{id}', [BlogController::class, 'getBlogsByAuthorId']);
 
-//Images
-Route::post('/upload-images', function (Request $request) {
+// sửa profile
+Route::middleware('auth:sanctum')->put('/profile', [ProfileController::class, 'update']);
 
+// //Images
+Route::post('/delete-image', function (Request $request) {
+
+    $public_id = $request->public_id;
     // Gọi hàm uploadImage từ service hoặc trực tiếp
-    $response = CloudinaryModel::uploadImage($request->file('images'));
+    $response = CloudinaryModel::deleteImage($public_id);
 
     // Trả về kết quả
     return response()->json($response);

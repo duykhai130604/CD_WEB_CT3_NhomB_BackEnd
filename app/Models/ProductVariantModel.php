@@ -232,7 +232,6 @@ class ProductVariantModel extends Model
         }
     }
     // Edit variant
-    // Edit variant
     public static function editVariant($request)
     {
         Log::info("All", $request->all());
