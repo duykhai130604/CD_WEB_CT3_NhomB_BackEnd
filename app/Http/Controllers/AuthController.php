@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Log;
+use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
-use Session;
+
 
 class AuthController extends Controller
 {
@@ -40,35 +42,55 @@ class AuthController extends Controller
 
         return response()->json(['token' => $token]);
     }
+
+
     public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
-        $user = $request->validate([
-            'email' => 'required',
-            'password' => 'required'
-        ]);
-        $user = User::where('email', $request->email)->first();
+
         try {
             if (!$token = JWTAuth::attempt($credentials)) {
                 return response()->json(['error' => 'Invalid credentials'], 401);
             }
-            // Retrieve user ID
-            $user = JWTAuth::user();
-            $user->id;
         } catch (JWTException $e) {
             return response()->json(['error' => 'Could not create token'], 500);
         }
-        return response()->json(['token' => $token]);
+        // Thiết lập cookie HTTP-only với token JWT
+        $cookie = cookie('token', $token, 60, null, null, false, true); // 60 phút, HTTP-only
+        return response()->json(['message' => 'Logged in successfully', 'user' => auth()->user()])->cookie($cookie);
     }
+    public function me(Request $request) 
+{
+    $user = $request->attributes->get('user'); // Lấy người dùng từ middleware
+
+    if (!$user) {
+        return response()->json(['error' => 'User not authenticated'], 401);
+    }
+
+    return response()->json([
+        'id' => $user->id,
+        'name' => $user->name,
+        'email' => $user->email
+    ]);
+}
 
     public function logout()
     {
-        try {
-            JWTAuth::invalidate(JWTAuth::getToken());
-            return response()->json(['message' => 'Successfully logged out']);
-        } catch (JWTException $e) {
-            return response()->json(['error' => 'Failed to log out, please try again.'], 500);
-        }
+        Auth::guard('api')->logout();
+        $cookie = cookie()->forget('token');
+
+        return response()->json(['message' => 'Logout successful'])->withCookie($cookie);
+    }
+    public function refresh()
+    {
+        $token = Auth::guard('api')->refresh();
+        $cookie = cookie('token', $token, 60, '/', null, false, true);
+
+        return response()->json(['message' => 'Token refreshed'])->withCookie($cookie);
+    }
+    public function user(Request $request)
+    {
+        return response()->json($request->user());
     }
 
     public function reset(Request $request)
@@ -94,25 +116,4 @@ class AuthController extends Controller
         // Trả về phản hồi thành công
         return response()->json(['message' => 'User updated successfully']);
     }
-    public function getUserId(Request $request)
-    {
-        $token = $request->bearerToken(); 
-    
-        if (!$token) {
-            return response()->json(['error' => 'Token not provided'], 401);
-        }
-    
-        try {
-            // Xác thực token và lấy payload
-            $payload = JWTAuth::setToken($token)->getPayload();
-            $userId = $payload['sub']; 
-            $user = User::find($userId);
-            return response()->json(['user_id' => $user->id,'user_name' => $user->name]);
-        } catch (JWTException $e) {
-            return response()->json(['error' => 'Token is invalid'], 401);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'User not found'], 404);
-        }
-    }
-    
 }

@@ -31,6 +31,8 @@ use App\Models\CloudinaryModel;
  Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+//Route::middleware(['auth:api'])->get('/get-user', [AuthController::class, 'getUserId']);
+
 
 // PRODUCT
 Route::get('/checkProduct', [ProductController::class, 'checkProduct']);
@@ -79,11 +81,11 @@ Route::post('/update-product-category-and-parent', [CategoryController::class, '
 // Route::post('/register', [RegisterController::class, 'register'])->name('register.post');
 //LOGIN,REGISTER
 //Reset password
-Route::post('/reset', [AuthController::class, 'reset']);
 Route::post('register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login'])->name('login');
-Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api');
-
+Route::post('reset', [AuthController::class, 'reset']);
+Route::post('login', [AuthController::class, 'login']);
+Route::middleware('auth:api')->post('/logout', [AuthController::class, 'logout']);
+Route::middleware(['custom.auth'])->get('/me', [AuthController::class, 'me']);
 //CRUD BLOG
 Route::get('/blog/{id}', [BlogController::class, 'getBlogById']);
 Route::get('/blogs', [BlogController::class, 'getAllBlogs']);
@@ -101,11 +103,9 @@ Route::middleware('auth:sanctum')->put('/profile', [ProfileController::class, 'u
 
 // //Images
 Route::post('/delete-image', function (Request $request) {
-
     $public_id = $request->public_id;
     // Gọi hàm uploadImage từ service hoặc trực tiếp
     $response = CloudinaryModel::deleteImage($public_id);
-
     // Trả về kết quả
     return response()->json($response);
 });
@@ -118,5 +118,5 @@ Route::get('/user-top-products/{userId}', [ProductController::class, 'getTopProd
 //đề xuất sản phẩm tương tự
 Route::get('/products/similar/{id}', [ProductController::class, 'getProductsBySimilarNameAndCategory']);
 
-Route::get('/get-user', [AuthController::class, 'getUserId']);
+ Route::get('/get-user', [AuthController::class, 'getUserId']);
 
