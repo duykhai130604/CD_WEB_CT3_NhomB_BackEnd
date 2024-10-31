@@ -3,6 +3,7 @@
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 //use App\Http\Controllers\LoginController;
@@ -13,9 +14,6 @@ use App\Http\Controllers\BlogController;
 use Illuminate\Support\Facades\Crypt;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductVariantController;
-
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\SizeController;
 use App\Models\CloudinaryModel;
 
 /*
@@ -29,11 +27,9 @@ use App\Models\CloudinaryModel;
 |
 */
 
- Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-//Route::middleware(['auth:api'])->get('/get-user', [AuthController::class, 'getUserId']);
-
 
 Route::get('/products/top', [HomeController::class, 'getTopProducts']);
 Route::get('/products', [ProductController::class, 'getAllProducts']);
@@ -81,12 +77,10 @@ Route::post('/update-product-category-and-parent', [CategoryController::class, '
 // Route::get('/register', [RegisterController::class, 'showRegisterForm'])->name('register');
 // Route::post('/register', [RegisterController::class, 'register'])->name('register.post');
 //LOGIN,REGISTER
-//Reset password
 Route::post('register', [AuthController::class, 'register']);
 Route::post('reset', [AuthController::class, 'reset']);
 Route::post('login', [AuthController::class, 'login']);
 Route::middleware('auth:api')->post('/logout', [AuthController::class, 'logout']);
-Route::middleware(['custom.auth'])->get('/me', [AuthController::class, 'me']);
 //CRUD BLOG
 Route::get('/blog/{id}', [BlogController::class, 'getBlogById']);
 Route::get('/blogs', [BlogController::class, 'getAllBlogs']);
@@ -95,40 +89,20 @@ Route::post('/update-blog', [BlogController::class, 'updateBlog']);
 Route::put('/blog/change-status/{id}', [BlogController::class, 'changeBlog']);
 Route::delete('/delete-blog/{id}', [BlogController::class, 'deleteBlog']);
 Route::get('/get-authorname', [BlogController::class, 'getNameUserByIds']);
+Route::get('/get-blog-by-author/{id}', [BlogController::class, 'getBlogsByAuthorId']);
 
-//Images
-Route::post('/upload-images', function (Request $request) {
+// sửa profile
+Route::middleware('auth:sanctum')->put('/profile', [ProfileController::class, 'update']);
 
-    // Gọi hàm uploadImage từ service hoặc trực tiếp
-    $response = CloudinaryModel::uploadImage($request->file('images'));
-
-});
 // //Images
 Route::post('/delete-image', function (Request $request) {
+
     $public_id = $request->public_id;
     // Gọi hàm uploadImage từ service hoặc trực tiếp
     $response = CloudinaryModel::deleteImage($public_id);
+
     // Trả về kết quả
     return response()->json($response);
 });
 // track users
 Route::get('/top-products', [ProductController::class, 'getTopProducts']);
-
-// sản phẩm có thể biết
-Route::get('/top-products-user-not', [ProductController::class, 'getTopProductsByUser']);
-// sản phẩm đề xuất qua tracking
-Route::get('/user-top-products', [ProductController::class, 'getTopProductsByUserInteracted']);
-//đề xuất sản phẩm tương tự
-Route::get('/products/similar/{id}', [ProductController::class, 'getProductsBySimilarNameAndCategory']);
-
- Route::get('/get-user', [AuthController::class, 'getUserId']);
-
-// track users
-Route::get('/top-products', [ProductController::class, 'getTopProducts']);
-// sản phẩm có thể biết
-Route::get('/top-products/{userId}', [ProductController::class, 'getTopProductsByUser']);
-// sản phẩm đề xuất qua tracking
-Route::get('/user-top-products/{userId}', [ProductController::class, 'getTopProductsByUserInteracted']);
-//đề xuất sản phẩm tương tự
-Route::get('/products/similar/{id}', [ProductController::class, 'getProductsBySimilarNameAndCategory']);
-
