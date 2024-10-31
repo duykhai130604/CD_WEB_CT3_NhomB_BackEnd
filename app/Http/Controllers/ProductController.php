@@ -91,24 +91,5 @@ class ProductController extends Controller
         $products = Product::getProductsBySimilarNameAndCategory($id);
 
         return response()->json($products,);
-    }
-    public function getTopProductsByUser($userId)
-    {
-        $topProducts = Product::getTopProductsByUserNotInteracted($userId);
-
-        return response()->json($topProducts);
-    }
-    public function getTopProductsByUserInteracted($userId)
-    {
-        $topProducts = Product::getTopProductsByUserInteracted($userId);
-
-        return response()->json($topProducts);
-    }
-      // Hàm lấy sản phẩm theo tên và danh mục tương tự
-      public function getProductsBySimilarNameAndCategory($id)
-      {
-          $products = Product::getProductsBySimilarNameAndCategory($id);
-  
-          return response()->json($products); 
-      }
+    } 
 }
