@@ -80,6 +80,7 @@ Route::post('/update-product-category-and-parent', [CategoryController::class, '
 Route::post('register', [AuthController::class, 'register']);
 Route::post('reset', [AuthController::class, 'reset']);
 Route::post('login', [AuthController::class, 'login']);
+Route::middleware(['custom.auth'])->get('me', [AuthController::class, 'me']);
 Route::middleware('auth:api')->post('/logout', [AuthController::class, 'logout']);
 //CRUD BLOG
 Route::get('/blog/{id}', [BlogController::class, 'getBlogById']);
