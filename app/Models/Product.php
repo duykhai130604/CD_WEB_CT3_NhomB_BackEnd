@@ -381,10 +381,9 @@ class Product extends Model
             ->groupBy('products.id')
             ->orderByDesc('action_count')
             ->paginate(4);
-        
     }
     // gần giống với đã tương tác
-    
+
     public static function getTopProductsByUserNotInteracted($userId)
     {
         return self::select('products.*')
@@ -403,7 +402,7 @@ class Product extends Model
     }
     /* Lấy top sản phẩm mà user chưa tương tác hoặc chưa 
     có user_id, sắp xếp ngẫu nhiên để tránh trùng lặp sản phẩm*/
-    public static function getTopProductsByUserInteracted($userId) 
+    public static function getTopProductsByUserInteracted($userId)
     {
         // Truy vấn các sản phẩm liên quan dựa trên các sản phẩm mà user đã tương tác
         $relatedProducts = self::select('similar_products.id', 'similar_products.name', 'similar_products.price', DB::raw('NULL as interaction_count'))
@@ -416,19 +415,19 @@ class Product extends Model
             ->whereNotNull('similar_products.id')
             ->whereNotNull('similar_products.name')
             ->whereNotNull('similar_products.price');
-    
+
         // Truy vấn các sản phẩm có lượt tương tác cao từ tất cả các user
         $popularProducts = self::select('products.id', 'products.name', 'products.price', DB::raw('COUNT(behaviors.id) as interaction_count'))
             ->join('behaviors', 'products.id', '=', 'behaviors.product_id')
             ->whereIn('behaviors.action', ['click', 'follow'])
             ->groupBy('products.id', 'products.name', 'products.price') // Cần nhóm theo các trường đã chọn
             ->orderByDesc('interaction_count');
-    
+
         // Kết hợp hai truy vấn và loại bỏ các bản ghi trùng lặp theo id
         $combinedQuery = $relatedProducts->union($popularProducts)
-            ->distinct() 
-            ->orderByRaw('RAND()'); 
-    
+            ->distinct()
+            ->orderByRaw('RAND()');
+
         // Lấy kết quả và phân trang
         return $combinedQuery->paginate(4);
     }
@@ -437,32 +436,34 @@ class Product extends Model
         $product = self::select('name')
             ->where('id', $productId)
             ->first();
-
-        if (!$product) {
-            return collect();
-        }
-
         $productName = $product->name;
         $keywords = explode(' ', $productName);
         $categoryIds = DB::table('product_category')
             ->where('product_id', $productId)
             ->pluck('category_id');
-
-        if ($categoryIds->isEmpty()) {
-            return collect();
-        }
         $categoryProducts = self::select('products.*', DB::raw('NULL AS interaction_count'))
             ->join('product_category', 'products.id', '=', 'product_category.product_id')
             ->whereIn('product_category.category_id', $categoryIds)
             ->where('products.id', '!=', $productId)
             ->distinct()
             ->get();
-        $data = array();
+        // Khởi tạo mảng similarProducts rỗng
+        $similarProducts = [];
+        // Lặp qua từng từ khóa
         foreach ($keywords as $keyword) {
-            $similarNameProducts = self::orWhere('products.name', 'LIKE', '%' . $keyword . '%')->distinct()->get();
-            array_push($data, $similarNameProducts);
+            // Tìm sản phẩm tương tự theo từng từ khóa
+            $products = self::where('products.name', 'LIKE', '%' . $keyword . '%')
+                ->where('products.id', '!=', $productId) // Loại bỏ sản phẩm chính nó
+                ->distinct()
+                ->get();
+            // Thêm từng sản phẩm vào mảng similarProducts
+            foreach ($products as $product) {
+                // Chỉ thêm sản phẩm nếu nó chưa tồn tại trong mảng similarProducts
+                if (!in_array($product, $similarProducts)) {
+                    $similarProducts[] = $product;
+                }
+            }
         }
-        array_push($data, $categoryProducts);
-        return $data;
+            return response()->json(['similar'=>$similarProducts,'catepro'=> $categoryProducts]); 
     }
 }

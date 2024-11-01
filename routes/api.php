@@ -81,7 +81,7 @@ Route::post('register', [AuthController::class, 'register']);
 Route::post('reset', [AuthController::class, 'reset']);
 Route::post('login', [AuthController::class, 'login']);
 Route::middleware(['custom.auth'])->get('me', [AuthController::class, 'me']);
-Route::middleware('auth:api')->post('/logout', [AuthController::class, 'logout']);
+Route::middleware(['custom.auth'])->post('logout', [AuthController::class, 'logout']);
 //CRUD BLOG
 Route::get('/blog/{id}', [BlogController::class, 'getBlogById']);
 Route::get('/blogs', [BlogController::class, 'getAllBlogs']);
@@ -91,6 +91,9 @@ Route::put('/blog/change-status/{id}', [BlogController::class, 'changeBlog']);
 Route::delete('/delete-blog/{id}', [BlogController::class, 'deleteBlog']);
 Route::get('/get-authorname', [BlogController::class, 'getNameUserByIds']);
 Route::get('/get-blog-by-author/{id}', [BlogController::class, 'getBlogsByAuthorId']);
+Route::get('/user-blogs', [BlogController::class, 'getBlogsByUserPage']);
+Route::get('/authors-count-blog', [BlogController::class, 'getAuthorsWithCountBlog']);
+
 
 // sửa profile
 Route::middleware('auth:sanctum')->put('/profile', [ProfileController::class, 'update']);
@@ -107,3 +110,9 @@ Route::post('/delete-image', function (Request $request) {
 });
 // track users
 Route::get('/top-products', [ProductController::class, 'getTopProducts']);
+// sản phẩm có thể biết
+Route::get('/top-products-user-not', [ProductController::class, 'getTopProductsByUser']);
+// sản phẩm đề xuất qua tracking
+Route::get('/user-top-products', [ProductController::class, 'getTopProductsByUserInteracted']);
+//đề xuất sản phẩm tương tự
+Route::get('/products/similar/{id}', [ProductController::class, 'getProductsBySimilarNameAndCategory']);
