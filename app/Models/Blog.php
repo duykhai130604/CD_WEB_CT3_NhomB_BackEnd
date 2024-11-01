@@ -52,7 +52,9 @@ class Blog extends Model
     {
         return self::orderBy('created_at', 'desc')->where('user_id', $id)->paginate(3);
     }
-   
+   public static function getBlogsByUserPage(){
+    return self::paginate(3);
+   }
     
     use HasFactory;
 }
