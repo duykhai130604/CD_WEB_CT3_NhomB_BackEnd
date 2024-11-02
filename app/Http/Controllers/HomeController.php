@@ -14,5 +14,5 @@ class HomeController extends Controller
         $topProducts = Product::orderBy('created_at', 'desc')->take(10)->get();
 
         return response()->json($topProducts);
-    }  
+    }
 }
