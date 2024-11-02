@@ -57,6 +57,9 @@ Route::get('/products-category/{id}', [ProductController::class, 'getProductByCa
 Route::get('/getAllCategories', [CategoryController::class, 'getAllCategories']);
 
 Route::get('/getProductDetails', [ProductController::class, 'getProductDetails']);
+Route::delete('/admin/deleteProduct', [ProductController::class, 'deleteProduct']);
+Route::get('/admin/productVariants', [ProductVariantController::class, 'getAllProductVariants']);
+Route::get('/getProductbyID/{id}', [ProductController::class, 'getProductbyID']);
 
 
 Route::get('/getCategoriesByProductId', [ProductCategoryController::class, 'getCategoriesByProductId']);
