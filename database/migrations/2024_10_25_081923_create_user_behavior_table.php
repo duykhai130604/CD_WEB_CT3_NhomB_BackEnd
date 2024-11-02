@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('behaviors', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id'); 
+            $table->unsignedBigInteger('user_id')->nullable(); 
             $table->enum('action', ['follow','click']); 
             $table->unsignedBigInteger('product_id'); 
             $table->timestamps();

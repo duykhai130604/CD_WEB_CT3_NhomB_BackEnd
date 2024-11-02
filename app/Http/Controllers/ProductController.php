@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Behavior;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
@@ -31,7 +32,8 @@ class ProductController extends Controller
     }
 
 
-    public function deleteProduct(Request $request) {
+    public function deleteProduct(Request $request)
+    {
         return Product::destroy($request);
     }
 
@@ -95,16 +97,26 @@ class ProductController extends Controller
         $products = Product::getProductsBySimilarNameAndCategory($decryptedId);
 
         return response()->json($products,);
-    } 
-    
+    }
+
     public function getProductbyID($id)
     {
-        $product = Product::find($id);
-
+        ///bạn phải viết hàm lấy product từ model
+        // $product = Product::find($id);
+        $decryptedId = Crypt::decrypt($id);
+        $productModel = new Product();
+        $product = $productModel->getProductById($decryptedId);
         if (!$product) {
             return response()->json(['message' => 'Product not found'], 404);
         }
-
+        $user = JWTAuth::parseToken()->authenticate();
+        if (!$user) {
+            Behavior::trackProductClick($product->id,null);
+        }
+        else{
+            $userId = $user->id;
+            Behavior::trackProductClick($product->id,$userId);
+        }
         return response()->json($product, 200);
     }
 }

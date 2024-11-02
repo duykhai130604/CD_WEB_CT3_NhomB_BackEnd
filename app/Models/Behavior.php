@@ -25,20 +25,20 @@ class Behavior extends Model
     // }
 
     // Hàm theo dõi hành vi click vào sản phẩm
-    public static function trackProductClick($productId)
+    public static function trackProductClick($productId,$user)
     {
         self::create([
-            'user_id' => auth()->id(),
+            'user_id' => $user??null,
             'action' => 'click',
             'product_id' => $productId,
         ]);
     }
 
     // Hàm theo dõi hành vi follow sản phẩm
-    public static function trackProductFollow($productId)
+    public static function trackProductFollow($productId,$user)
     {
         self::create([
-            'user_id' => auth()->id(),
+            'user_id' => $user,
             'action' => 'follow',
             'product_id' => $productId,
         ]);
