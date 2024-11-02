@@ -40,6 +40,7 @@ Route::post('/admin/editProduct',[ProductController::class,'editProduct']);
 Route::get('/getProductDetails', [ProductController::class, 'getProductDetails']);
 Route::delete('/admin/deleteProduct', [ProductController::class, 'deleteProduct']);
 Route::get('/admin/productVariants', [ProductVariantController::class, 'getAllProductVariants']);
+Route::get('/getProductbyID/{id}', [ProductController::class, 'getProductbyID']);
 
 Route::get('/getCategoriesByProductId', [ProductCategoryController::class, 'getCategoriesByProductId']);
 
