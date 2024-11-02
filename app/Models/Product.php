@@ -53,6 +53,7 @@ class Product extends Model
             'product' => $product
         ]);
     }
+
     /**
      * Lấy danh sách sản phẩm với tùy chọn tìm kiếm.
      *
@@ -507,6 +508,10 @@ class Product extends Model
                 }
             }
         }
-            return response()->json(['similar'=>$similarProducts,'catepro'=> $categoryProducts]); 
+        return response()->json(['similar' => $similarProducts, 'catepro' => $categoryProducts]);
+    }
+    public function getProductById($id)
+    {
+        return self::findOrFail($id);
     }
 }
