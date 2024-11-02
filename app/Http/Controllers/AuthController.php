@@ -58,7 +58,7 @@ class AuthController extends Controller
     }
     public function me(Request $request)
     {
-        $user = $request->attributes->get('user'); 
+        $user = $request->attributes->get('user');
         if (!$user) {
             return response()->json(['error' => 'User not authenticated'], 401);
         }
