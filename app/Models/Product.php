@@ -69,7 +69,12 @@ class Product extends Model
                 $productsQuery->where('name', 'like', '%' . $keyword . '%');
             }
 
-            $products = $productsQuery->orderBy('updated_at', 'desc')->paginate(10);
+            // Lọc các sản phẩm có ít nhất một danh mục còn tồn tại
+            $products = $productsQuery->whereHas('categories', function ($query) {
+                $query->whereNull('deleted_at');
+            })
+                ->orderBy('updated_at', 'desc')
+                ->paginate(10);
 
             if ($products->isEmpty()) {
                 return response()->json([
@@ -81,11 +86,14 @@ class Product extends Model
             }
 
             $responseData = $products->getCollection()->map(function ($product) {
+                // Lọc các danh mục còn tồn tại
+                $activeCategories = $product->categories()->whereNull('deleted_at')->get();
+
                 return [
                     'id' => EncryptionModel::encodeId($product->id),
                     'name' => $product->name,
                     'desc' => $product->desc,
-                    'category_id' => $product->category_id,
+                    'category_id' => $activeCategories->pluck('id'), // Lấy danh sách category_id còn tồn tại
                     'price' => $product->price,
                     'discount' => $product->discount,
                     'status' => $product->status,
@@ -106,6 +114,9 @@ class Product extends Model
             ], 422);
         }
     }
+
+
+
 
 
     /**
@@ -216,16 +227,18 @@ class Product extends Model
             'name.min' => 'The name only includes a-z, A-Z, 0-9, the length must be between 3 and 255 characters',
             'name.max' => 'The name only includes a-z, A-Z, 0-9, the length must be between 3 and 255 characters',
             'price.required' => 'Required field',
-            'price.integer' => 'Price must be a integer greater than 0 and up to 12 digits',
-            'price.min' => 'Price must be a integer greater than 0 and up to 12 digits',
-            'price.digits_between' => 'Price must be a integer greater than 0 and up to 12 digits',
-            'discount.integer' => 'Discount must be a integer and 0 < Discount < 101',
-            'discount.between' => 'Discount must be a integer and 0 < Discount < 101',
+            'price.integer' => 'Price must be an integer greater than 0 and up to 12 digits',
+            'price.min' => 'Price must be an integer greater than 0 and up to 12 digits',
+            'price.digits_between' => 'Price must be an integer greater than 0 and up to 12 digits',
+            'discount.integer' => 'Discount must be an integer and 0 < Discount < 101',
+            'discount.between' => 'Discount must be an integer and 0 < Discount < 101',
             'categories.required' => 'Required field',
             'categories.array' => 'Categories must be an array',
+            'categories.exists' => 'One or more categories are invalid or deleted.',
+            'categories.min' => 'At least one category must be valid.',
             'desc.required' => 'Required field',
             'desc.max' => 'The length of description must be between 1 and 2000 characters',
-            'image.image' => 'The file must be an image' // Thêm kiểm tra cho ảnh mới
+            'image.image' => 'The file must be an image'
         ];
 
         $validator = Validator::make($request->all(), [
@@ -234,7 +247,7 @@ class Product extends Model
             'discount' => 'nullable|integer|between:0,100',
             'categories' => 'required|array|exists:categories,id',
             'desc' => 'required|max:2000',
-            'image' => 'nullable|image' // Ảnh là tùy chọn, nếu có thì phải là ảnh
+            'image' => 'nullable|image'
         ], $messages);
 
         if ($validator->fails()) {
@@ -256,11 +269,39 @@ class Product extends Model
         try {
             $id = EncryptionModel::decodeId($request->id);
             $product = self::find($id);
-            if (!$product || $product->status == 0) {
+
+            // Kiểm tra xem sản phẩm có tồn tại
+            if (!$product) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'The product does not exist.'
+                ], 404);
+            }
+
+            if ($product->status == 0) { // Kiểm tra xem sản phẩm đã bị xóa chưa
                 return response()->json([
                     'status' => 'error',
                     'message' => 'The product has been deleted.'
                 ], 404);
+            }
+
+            // Kiểm tra các danh mục xem có bị xóa mềm hay không
+            $validCategories = [];
+            foreach ($request->categories as $categoryId) {
+                $category = Category::withTrashed()->find($categoryId);
+                if ($category && $category->deleted_at === null) {
+                    $validCategories[] = $categoryId; // Lưu danh mục hợp lệ
+                }
+            }
+
+            // Kiểm tra xem có ít nhất một danh mục hợp lệ hay không
+            if (empty($validCategories)) {
+                return response()->json([
+                    'status' => 'error',
+                    'errors' => [
+                        'categories' => 'At least one category must be valid and not deleted.'
+                    ]
+                ], 422);
             }
 
             // Cập nhật thông tin sản phẩm
@@ -298,7 +339,7 @@ class Product extends Model
             $product->save();
 
             // Cập nhật danh mục sản phẩm
-            ProductCategory::updateProductCategories($product->id, $request->categories);
+            ProductCategory::updateProductCategories($product->id, $validCategories);
 
             return response()->json([
                 'status' => 'success',
@@ -311,6 +352,8 @@ class Product extends Model
             ], 500);
         }
     }
+
+
 
 
     /**
@@ -381,10 +424,9 @@ class Product extends Model
             ->groupBy('products.id')
             ->orderByDesc('action_count')
             ->paginate(4);
-        
     }
     // gần giống với đã tương tác
-    
+
     public static function getTopProductsByUserNotInteracted($userId)
     {
         return self::select('products.*')
@@ -401,9 +443,9 @@ class Product extends Model
             ->orderByDesc('action_count')
             ->paginate(4);
     }
-    /* Lấy top sản phẩm mà user chưa tương tác hoặc chưa 
+    /* Lấy top sản phẩm mà user chưa tương tác hoặc chưa
     có user_id, sắp xếp ngẫu nhiên để tránh trùng lặp sản phẩm*/
-    public static function getTopProductsByUserInteracted($userId) 
+    public static function getTopProductsByUserInteracted($userId)
     {
         // Truy vấn các sản phẩm liên quan dựa trên các sản phẩm mà user đã tương tác
         $relatedProducts = self::select('similar_products.id', 'similar_products.name', 'similar_products.price', DB::raw('NULL as interaction_count'))
@@ -416,19 +458,19 @@ class Product extends Model
             ->whereNotNull('similar_products.id')
             ->whereNotNull('similar_products.name')
             ->whereNotNull('similar_products.price');
-    
+
         // Truy vấn các sản phẩm có lượt tương tác cao từ tất cả các user
         $popularProducts = self::select('products.id', 'products.name', 'products.price', DB::raw('COUNT(behaviors.id) as interaction_count'))
             ->join('behaviors', 'products.id', '=', 'behaviors.product_id')
             ->whereIn('behaviors.action', ['click', 'follow'])
             ->groupBy('products.id', 'products.name', 'products.price') // Cần nhóm theo các trường đã chọn
             ->orderByDesc('interaction_count');
-    
+
         // Kết hợp hai truy vấn và loại bỏ các bản ghi trùng lặp theo id
         $combinedQuery = $relatedProducts->union($popularProducts)
-            ->distinct() 
-            ->orderByRaw('RAND()'); 
-    
+            ->distinct()
+            ->orderByRaw('RAND()');
+
         // Lấy kết quả và phân trang
         return $combinedQuery->paginate(4);
     }
@@ -437,32 +479,34 @@ class Product extends Model
         $product = self::select('name')
             ->where('id', $productId)
             ->first();
-
-        if (!$product) {
-            return collect();
-        }
-
         $productName = $product->name;
         $keywords = explode(' ', $productName);
         $categoryIds = DB::table('product_category')
             ->where('product_id', $productId)
             ->pluck('category_id');
-
-        if ($categoryIds->isEmpty()) {
-            return collect();
-        }
         $categoryProducts = self::select('products.*', DB::raw('NULL AS interaction_count'))
             ->join('product_category', 'products.id', '=', 'product_category.product_id')
             ->whereIn('product_category.category_id', $categoryIds)
             ->where('products.id', '!=', $productId)
             ->distinct()
             ->get();
-        $data = array();
+        // Khởi tạo mảng similarProducts rỗng
+        $similarProducts = [];
+        // Lặp qua từng từ khóa
         foreach ($keywords as $keyword) {
-            $similarNameProducts = self::orWhere('products.name', 'LIKE', '%' . $keyword . '%')->distinct()->get();
-            array_push($data, $similarNameProducts);
+            // Tìm sản phẩm tương tự theo từng từ khóa
+            $products = self::where('products.name', 'LIKE', '%' . $keyword . '%')
+                ->where('products.id', '!=', $productId) // Loại bỏ sản phẩm chính nó
+                ->distinct()
+                ->get();
+            // Thêm từng sản phẩm vào mảng similarProducts
+            foreach ($products as $product) {
+                // Chỉ thêm sản phẩm nếu nó chưa tồn tại trong mảng similarProducts
+                if (!in_array($product, $similarProducts)) {
+                    $similarProducts[] = $product;
+                }
+            }
         }
-        array_push($data, $categoryProducts);
-        return $data;
+            return response()->json(['similar'=>$similarProducts,'catepro'=> $categoryProducts]); 
     }
 }

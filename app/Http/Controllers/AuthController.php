@@ -46,48 +46,41 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
-
-        // $user = $request->validate(['email' => 'required',
-        //                                     'password' => 'required']);   
-        // $user = User::where('email', $request->email)->first();
-        // session::put('id',$user->id);
-        //         session('login');
-        //         $request->session()->put('login.user_id', $user->id);   
         try {
             if (!$token = JWTAuth::attempt($credentials)) {
                 return response()->json(['error' => 'Invalid credentials'], 401);
             }
-
-            // Retrieve user ID
-            // $user = JWTAuth::user();
-            // $userId = $user->id;
         } catch (JWTException $e) {
             return response()->json(['error' => 'Could not create token'], 500);
         }
-        // Thiết lập cookie HTTP-only với token JWT
         $cookie = cookie('token', $token, 60, null, null, false, true); // 60 phút, HTTP-only
         return response()->json(['message' => 'Logged in successfully', 'user' => auth()->user()])->cookie($cookie);
     }
     public function me(Request $request)
     {
-        $user = $request->attributes->get('user'); 
+        $user = $request->attributes->get('user');
         if (!$user) {
             return response()->json(['error' => 'User not authenticated'], 401);
         }
         return response()->json([
-            'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email
         ]);
     }
 
-    public function logout()
-    {
-        Auth::guard('api')->logout();
-        $cookie = cookie()->forget('token');
+    public function logout(Request $request)
+{
+    $token = $request->cookie('token');
 
-        return response()->json(['message' => 'Logout successful'])->withCookie($cookie);
+    if (!$token) {
+        return response()->json(['error' => 'No active session found'], 400);
     }
+
+    $cookie = cookie()->forget('token');
+
+    return response()->json(['message' => 'Logout successful'])->withCookie($cookie);
+}
+
     public function refresh()
     {
         $token = Auth::guard('api')->refresh();

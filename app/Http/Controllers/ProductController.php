@@ -88,7 +88,11 @@ class ProductController extends Controller
     // Hàm lấy sản phẩm theo tên và danh mục tương tự
     public function getProductsBySimilarNameAndCategory($id)
     {
-        $products = Product::getProductsBySimilarNameAndCategory($id);
+        $decryptedId = Crypt::decrypt($id);
+        if (!is_numeric($decryptedId) || intval($decryptedId) <= 0) {
+            return response()->json(['error' => 'Invalid ID format.'], 400);
+        }
+        $products = Product::getProductsBySimilarNameAndCategory($decryptedId);
 
         return response()->json($products,);
     } 

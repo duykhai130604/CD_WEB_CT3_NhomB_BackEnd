@@ -13,7 +13,10 @@ use App\Http\Controllers\BlogController;
 
 use Illuminate\Support\Facades\Crypt;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ColorController;
 use App\Http\Controllers\ProductVariantController;
+use App\Http\Controllers\SizeController;
+use App\Http\Middleware\RoleMiddleware;
 use App\Models\CloudinaryModel;
 
 /*
@@ -31,29 +34,46 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+// Route::middleware(['custom.auth', 'role:admin'])->group(function () {
+//     Route::post('/admin/addProduct', [ProductController::class, 'addProduct']);
+//     Route::post('/admin/editProduct', [ProductController::class, 'editProduct']);
+//     Route::delete('/admin/deleteProduct', [ProductController::class, 'deleteProduct']);
+//     Route::get('/admin/productVariants', [ProductVariantController::class, 'getAllProductVariants']);
+// });
+Route::middleware(['role:admin'])->get('/test-role', function () {
+    return response()->json(['message' => 'Role middleware applied']);
+});
+
+
+Route::post('/admin/addProduct', [ProductController::class, 'addProduct']);
+Route::post('/admin/editProduct', [ProductController::class, 'editProduct']);
+Route::delete('/admin/deleteProduct', [ProductController::class, 'deleteProduct']);
+Route::get('/admin/productVariants', [ProductVariantController::class, 'getAllProductVariants']);
+
+
 Route::get('/products/top', [HomeController::class, 'getTopProducts']);
 Route::get('/products', [ProductController::class, 'getAllProducts']);
 Route::get('/products-category/{id}', [ProductController::class, 'getProductByCategoryId']);
 Route::get('/getAllCategories', [CategoryController::class, 'getAllCategories']);
-Route::post('/admin/addProduct',[ProductController::class,'addProduct']);
-Route::post('/admin/editProduct',[ProductController::class,'editProduct']);
+
 Route::get('/getProductDetails', [ProductController::class, 'getProductDetails']);
 Route::delete('/admin/deleteProduct', [ProductController::class, 'deleteProduct']);
 Route::get('/admin/productVariants', [ProductVariantController::class, 'getAllProductVariants']);
 Route::get('/getProductbyID/{id}', [ProductController::class, 'getProductbyID']);
 
+
 Route::get('/getCategoriesByProductId', [ProductCategoryController::class, 'getCategoriesByProductId']);
 
 // PRODUCT VARIANT
-// Route::get('/getAllSizes',[SizeController::class, 'getAllSizes']);
-// Route::get('/getAllColors',[ColorController::class, 'getAllColors']);
-// Route::post('/admin/addProductVariant',[ProductVariantController::class,'addProductVariant']);
-// Route::delete('/admin/deleteProductVariant', [ProductVariantController::class, 'deleteProductVariant']);
+Route::get('/getAllSizes', [SizeController::class, 'getAllSizes']);
+Route::get('/getAllColors', [ColorController::class, 'getAllColors']);
+Route::post('/admin/addProductVariant', [ProductVariantController::class, 'addProductVariant']);
+Route::delete('/admin/deleteProductVariant', [ProductVariantController::class, 'deleteProductVariant']);
 
 // category manage
 Route::get('/categories', [CategoryController::class, 'getCategoriesByPage']);
 
-Route::get('/encrypt/{id}', function($id) {
+Route::get('/encrypt/{id}', function ($id) {
     $encryptedId = Crypt::encrypt($id);
     return response()->json([
         'original_id' => $id,
@@ -81,8 +101,9 @@ Route::post('/update-product-category-and-parent', [CategoryController::class, '
 Route::post('register', [AuthController::class, 'register']);
 Route::post('reset', [AuthController::class, 'reset']);
 Route::post('login', [AuthController::class, 'login']);
+
 Route::middleware(['custom.auth'])->get('me', [AuthController::class, 'me']);
-Route::middleware('auth:api')->post('/logout', [AuthController::class, 'logout']);
+Route::middleware(['custom.auth'])->post('logout', [AuthController::class, 'logout']);
 //CRUD BLOG
 Route::get('/blog/{id}', [BlogController::class, 'getBlogById']);
 Route::get('/blogs', [BlogController::class, 'getAllBlogs']);
@@ -92,6 +113,9 @@ Route::put('/blog/change-status/{id}', [BlogController::class, 'changeBlog']);
 Route::delete('/delete-blog/{id}', [BlogController::class, 'deleteBlog']);
 Route::get('/get-authorname', [BlogController::class, 'getNameUserByIds']);
 Route::get('/get-blog-by-author/{id}', [BlogController::class, 'getBlogsByAuthorId']);
+Route::get('/user-blogs', [BlogController::class, 'getBlogsByUserPage']);
+Route::get('/authors-count-blog', [BlogController::class, 'getAuthorsWithCountBlog']);
+
 
 // sửa profile
 Route::middleware('auth:sanctum')->put('/profile', [ProfileController::class, 'update']);
@@ -108,3 +132,9 @@ Route::post('/delete-image', function (Request $request) {
 });
 // track users
 Route::get('/top-products', [ProductController::class, 'getTopProducts']);
+// sản phẩm có thể biết
+Route::get('/top-products-user-not', [ProductController::class, 'getTopProductsByUser']);
+// sản phẩm đề xuất qua tracking
+Route::get('/user-top-products', [ProductController::class, 'getTopProductsByUserInteracted']);
+//đề xuất sản phẩm tương tự
+Route::get('/products/similar/{id}', [ProductController::class, 'getProductsBySimilarNameAndCategory']);
