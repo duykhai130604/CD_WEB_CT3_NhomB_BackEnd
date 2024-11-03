@@ -14,6 +14,20 @@ class Product extends Model
     use HasFactory;
 
     use SoftDeletes;
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
+
+    public function size()
+    {
+        return $this->belongsTo(SizeModel::class);
+    }
+
+    public function color()
+    {
+        return $this->belongsTo(ColorModel::class);
+    }
     public static function checkProduct($request)
     {
         $id = $request->input('id');

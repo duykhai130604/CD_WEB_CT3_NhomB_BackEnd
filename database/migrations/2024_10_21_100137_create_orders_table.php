@@ -12,13 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('orders', function (Blueprint $table) {
-            $table->id()->unsigned(); 
+            $table->id()->unsigned();
             $table->integer('user_id');
             $table->integer('amount');
+            $table->string('phone',15);
             $table->string('address', 255)->collation('utf8mb4_unicode_ci');
             $table->integer('status');
-            $table->timestamp('created_at')->nullable()->useCurrent(); 
-            $table->timestamp('updated_at')->nullable()->useCurrentOnUpdate()->useCurrent(); 
+            $table->timestamp('created_at')->nullable()->useCurrent();
+            $table->timestamp('updated_at')->nullable()->useCurrentOnUpdate()->useCurrent();
         });
     }
 

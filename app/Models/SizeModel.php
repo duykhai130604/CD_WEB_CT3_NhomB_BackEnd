@@ -21,13 +21,17 @@ class SizeModel extends Model
         $sizes = $sizes->map(function ($size) {
             return [
                 'id' => EncryptionModel::encodeId($size->id),
-                'name' => $size->name, 
+                'name' => $size->name,
             ];
         });
-        
+
         return response()->json([
             "status" => "success",
             "sizes" => $sizes
         ]);
+    }
+    public function size()
+    {
+        return $this->belongsTo(SizeModel::class, 'size_id'); // Đảm bảo 'size_id' là khóa ngoại trong bảng 'product_variants'
     }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
@@ -70,6 +71,10 @@ Route::get('/getAllColors', [ColorController::class, 'getAllColors']);
 Route::post('/admin/addProductVariant', [ProductVariantController::class, 'addProductVariant']);
 Route::delete('/admin/deleteProductVariant', [ProductVariantController::class, 'deleteProductVariant']);
 
+// CART
+Route::get('/getCarts', [CartController::class, 'getCartByUserId']);
+Route::delete("/deleteCartItem",[CartController::class,"deleteCartItem"]);
+Route::put('/updateCartItem', [CartController::class, 'updateCartItem']);
 // category manage
 Route::get('/categories', [CategoryController::class, 'getCategoriesByPage']);
 

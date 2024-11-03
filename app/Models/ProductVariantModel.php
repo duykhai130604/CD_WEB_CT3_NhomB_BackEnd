@@ -14,6 +14,19 @@ class ProductVariantModel extends Model
     use SoftDeletes;
     use HasFactory;
     protected $table = 'product_variants';
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
+    public function size()
+    {
+        return $this->belongsTo(SizeModel::class);
+    }
+
+    public function color()
+    {
+        return $this->belongsTo(ColorModel::class);
+    }
     public static function getAllVariantsByProductId($request)
     {
         $encodedId = $request->input('encodedId');
