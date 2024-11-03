@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class RoleMiddleware
 {
@@ -17,21 +18,18 @@ class RoleMiddleware
      */
     public function handle($request, Closure $next, $role = null)
     {
-        // Lấy thông tin người dùng đã đăng nhập
-        $user = Auth::user();
-        // Kiểm tra nếu không có người dùng (chưa đăng nhập)
-        if (!$user) {
-            Log::warning("No user authenticated");
-            return response()->json(['error' => 'Token not provided'], 401);
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+        } catch (\Exception $e) {
+            Log::warning("No user authenticated: " . $e->getMessage());
+            return response()->json(['error' => 'Token not provided or invalid'], 401);
         }
 
-        // Kiểm tra nếu vai trò không khớp
-        if ($user->role !== $role) {
+        if ($role && $user->role !== $role) {
             Log::warning("User role mismatch: expected {$role}, got {$user->role}");
             return response()->json(['error' => 'Unauthorized: insufficient permissions'], 403);
         }
 
         return $next($request);
     }
-
 }

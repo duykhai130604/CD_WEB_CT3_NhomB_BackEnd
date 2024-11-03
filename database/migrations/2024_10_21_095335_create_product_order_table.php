@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('product-order', function (Blueprint $table) {
+        Schema::create('product_order', function (Blueprint $table) {
             $table->integer('product_variant_id');
             $table->integer('order_id');
             $table->integer('quantity');
             $table->timestamp('created_at')->nullable()->useCurrent();
-            $table->timestamp('updated_at')->nullable()->useCurrentOnUpdate()->useCurrent();    
+            $table->timestamp('updated_at')->nullable()->useCurrentOnUpdate()->useCurrent();
         });
     }
 
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('product-order');
+        Schema::dropIfExists('product_order');
     }
 };

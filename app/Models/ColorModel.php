@@ -20,12 +20,16 @@ class ColorModel extends Model
         $colors = $colors->map(function ($color) {
             return [
                 'id' => EncryptionModel::encodeId($color->id),
-                'name' => $color->name, 
+                'name' => $color->name,
             ];
         });
         return response()->json([
             "status" => "success",
             "colors" => $colors
         ]);
+    }
+    public function color()
+    {
+        return $this->belongsTo(ColorModel::class, 'color_id');
     }
 }
