@@ -138,3 +138,8 @@ Route::get('/top-products-user-not', [ProductController::class, 'getTopProductsB
 Route::get('/user-top-products', [ProductController::class, 'getTopProductsByUserInteracted']);
 //đề xuất sản phẩm tương tự
 Route::get('/products/similar/{id}', [ProductController::class, 'getProductsBySimilarNameAndCategory']);
+
+//---------------------------------------------------------------
+//lấy biến thể của sản phẩm
+Route::get('/product/variants/{id}', [ProductVariantController::class, 'getProductVariants']);
+

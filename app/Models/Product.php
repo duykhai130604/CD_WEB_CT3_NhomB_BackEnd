@@ -426,24 +426,26 @@ class Product extends Model
             ->orderByDesc('action_count')
             ->paginate(4);
     }
-    // gần giống với đã tương tác
-
     public static function getTopProductsByUserNotInteracted($userId)
     {
-        return self::select('products.*')
-            ->join('behaviors', 'products.id', '=', 'behaviors.product_id')
-            ->join('product_category as pc_user', 'pc_user.product_id', '=', 'products.id')
+        $interactedProductIds = DB::table('behaviors')
+            ->where('user_id', $userId)
+            ->whereIn('action', ['click', 'follow'])
+            ->pluck('product_id');
+    
+        return DB::table('products as similar_products')
+            ->select('similar_products.id', 'similar_products.name','similar_products.price'
+            ,'similar_products.discount','similar_products.thumbnail') // Liệt kê các trường cần thiết từ `similar_products`
+            ->join('product_category as pc_user', 'pc_user.product_id', '=', 'similar_products.id')
             ->join('product_category as pc_similar', 'pc_user.category_id', '=', 'pc_similar.category_id')
-            ->join('products as similar_products', 'similar_products.id', '=', 'pc_similar.product_id')
-            ->where('behaviors.user_id', $userId)
-            ->whereIn('behaviors.action', ['click', 'follow'])
-            ->where('similar_products.id', '!=', 'products.id')
-            ->select('similar_products.*')
-            ->selectRaw('count(behaviors.id) as action_count')
-            ->groupBy('similar_products.id')
-            ->orderByDesc('action_count')
+            ->join('products', 'products.id', '=', 'pc_similar.product_id')
+            ->whereNotIn('similar_products.id', $interactedProductIds)
+            ->selectRaw('COUNT(pc_similar.category_id) as similarity_count')
+            ->groupBy('similar_products.id', 'similar_products.name') // Nhóm theo các cột đã chọn
+            ->orderByDesc('similarity_count')
             ->paginate(4);
     }
+    
     /* Lấy top sản phẩm mà user chưa tương tác hoặc chưa
     có user_id, sắp xếp ngẫu nhiên để tránh trùng lặp sản phẩm*/
     public static function getTopProductsByUserInteracted($userId)

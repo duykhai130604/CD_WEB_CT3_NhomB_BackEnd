@@ -57,7 +57,7 @@ class ProductController extends Controller
     }
     public function getTopProductsByUser()
     {
-        try {
+         try {
             // Lấy thông tin người dùng từ JWT
             $user = JWTAuth::parseToken()->authenticate();
             if (!$user) {
@@ -66,10 +66,10 @@ class ProductController extends Controller
             $userId = $user->id;
             $topProducts = Product::getTopProductsByUserNotInteracted($userId);
             return response()->json($topProducts);
-        } catch (\Exception $e) {
-            // Bắt lỗi nếu token không hợp lệ hoặc có lỗi khác
-            return response()->json(['error' => 'Token is invalid or expired'], 401);
-        }
+         } catch (\Exception $e) {
+         // Bắt lỗi nếu token không hợp lệ hoặc có lỗi khác
+             return response()->json(['error' => 'Token is invalid or expired'], 401);
+     }
     }
     public function getTopProductsByUserInteracted()
     {

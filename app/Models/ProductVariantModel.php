@@ -401,4 +401,16 @@ class ProductVariantModel extends Model
             'variant' => $responseData,
         ]);
     }
+    public static function getProductVariants($id)
+{
+    return DB::table('product_variants as pv')
+        ->join('products as p', 'pv.product_id', '=', 'p.id')
+        ->join('colors as c', 'pv.color_id', '=', 'c.id')
+        ->join('sizes as s', 'pv.size_id', '=', 's.id')
+        ->join('product_images as pi', 'pi.variant_id', '=', 'pv.id')
+        ->where('p.id', $id) 
+        ->select('c.name as color', 's.name as size', 'pv.quantity', 'pi.url')
+        ->get();
+}
+
 }
