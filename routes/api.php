@@ -15,6 +15,7 @@ use App\Http\Controllers\BlogController;
 use Illuminate\Support\Facades\Crypt;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ColorController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductVariantController;
 use App\Http\Controllers\SizeController;
 use App\Http\Middleware\RoleMiddleware;
@@ -148,3 +149,6 @@ Route::get('/products/similar/{id}', [ProductController::class, 'getProductsBySi
 //lấy biến thể của sản phẩm
 Route::get('/product/variants/{id}', [ProductVariantController::class, 'getProductVariants']);
 
+//---------------------------------------------------------------
+//get order by user
+Route::get('/user/orders', [OrderController::class, 'getOrdersByUser']);
