@@ -425,5 +425,4 @@ class ProductVariantModel extends Model
         ->select('c.name as color', 's.name as size', 'pv.quantity', 'pi.url')
         ->get();
 }
-
 }

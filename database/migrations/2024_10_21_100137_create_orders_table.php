@@ -18,8 +18,11 @@ return new class extends Migration
             $table->string('phone',15);
             $table->string('address', 255)->collation('utf8mb4_unicode_ci');
             $table->integer('status');
+            $table->boolean('rate');
             $table->timestamp('created_at')->nullable()->useCurrent();
             $table->timestamp('updated_at')->nullable()->useCurrentOnUpdate()->useCurrent();
+            $table->timestamp('destroyed_at')->nullable();
+
         });
     }
 

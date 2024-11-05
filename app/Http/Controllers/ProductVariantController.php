@@ -35,9 +35,9 @@ class ProductVariantController extends Controller
     {
         $decryptedId = Crypt::decrypt($id);
         $variants = ProductVariantModel::getProductVariants($decryptedId);
-        // if ($variants->isEmpty()) {
-        //     return response()->json(['message' => 'No product variants found'], 404);
-        // }
+        if ($variants->isEmpty()) {
+            return response()->json(['message' => 'No product variants found'], 404);
+        }
         return response()->json($variants);
     }
 }
