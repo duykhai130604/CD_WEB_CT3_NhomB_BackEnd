@@ -137,12 +137,13 @@ class ProductVariantModel extends Model
                 'status' => 'error',
                 'errors' => [
                     'quantity' => $validator->errors()->first('quantity'),
-                    'images' => $validator->errors()->first('images.*'),
+                    'images' => $validator->errors()->first('images.*') ?: $validator->errors()->first('images'),
                     'color_id' => $validator->errors()->first('color_id'),
                     'size_id' => $validator->errors()->first('size_id'),
                 ]
             ], 422);
         }
+
 
         $totalSize = array_reduce($images, function ($carry, $image) {
             return $carry + $image->getSize();

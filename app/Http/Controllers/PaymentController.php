@@ -49,16 +49,14 @@ class PaymentController extends Controller
         // 5. Sử dụng transaction để đảm bảo tính nhất quán của dữ liệu
         DB::beginTransaction();
         try {
-            // 5.1. Tạo đơn hàng
             $order = OrderModel::create([
                 'user_id' => $userId,
                 'amount' => $totalAmount,
                 'phone' => $request->input('phone'),
                 'address' => $request->input('address'),
-                'status' => 1, // Giả sử 1 là trạng thái 'đang xử lý'
+                'status' => 1,
             ]);
 
-            // 5.2. Lưu thông tin sản phẩm vào bảng product_order
             foreach ($carts as $cart) {
                 ProductOrderModel::create([
                     'product_variant_id' => $cart->product_variant_id,
@@ -77,7 +75,7 @@ class PaymentController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['message' => 'Đã xảy ra lỗi trong quá trình thanh toán. Vui lòng thử lại sau.'], 500);
+            return response()->json(['message' => 'Đã xảy ra lỗi trong quá trình thanh toán. Vui lòng thử lại sau. ' . $e->getMessage()], 500);
         }
     }
 

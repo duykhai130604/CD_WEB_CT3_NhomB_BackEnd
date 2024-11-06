@@ -20,7 +20,7 @@ class ProductsTableSeeder extends Seeder
                 'price' => 250000,
                 'discount' => 10,
                 'status' => 1,
-                'thumbnail' => 'https://example.com/image1.jpg',
+                'thumbnail' => 'https://res.cloudinary.com/dkfedhd63/image/upload/v1730736293/tdxnl4uoedetpcyopkz4.jpg',
                 'public_id' => 'ri5xe77zfuhr3qq6lws3',
                 'created_at' => '2024-10-01 03:00:00',
                 'updated_at' => '2024-10-01 03:05:00'
@@ -31,7 +31,7 @@ class ProductsTableSeeder extends Seeder
                 'price' => 400000,
                 'discount' => 15,
                 'status' => 1,
-                'thumbnail' => 'https://example.com/image2.jpg',
+                'thumbnail' => 'https://res.cloudinary.com/dkfedhd63/image/upload/v1730736293/tdxnl4uoedetpcyopkz4.jpg',
                 'public_id' => 'hqlitcsnzrx5h2tatm5h',
                 'created_at' => '2024-10-02 04:00:00',
                 'updated_at' => '2024-10-02 04:10:00'
@@ -42,7 +42,7 @@ class ProductsTableSeeder extends Seeder
                 'price' => 150000,
                 'discount' => 5,
                 'status' => 1,
-                'thumbnail' => 'https://example.com/image3.jpg',
+                'thumbnail' => 'https://res.cloudinary.com/dkfedhd63/image/upload/v1730736293/tdxnl4uoedetpcyopkz4.jpg',
                 'public_id' => 's6r5gsa9yacxdqnta2m8',
                 'created_at' => '2024-10-03 05:00:00',
                 'updated_at' => '2024-10-03 05:05:00'
@@ -53,7 +53,7 @@ class ProductsTableSeeder extends Seeder
                 'price' => 600000,
                 'discount' => 20,
                 'status' => 1,
-                'thumbnail' => 'https://example.com/image4.jpg',
+                'thumbnail' => 'https://res.cloudinary.com/dkfedhd63/image/upload/v1730736293/tdxnl4uoedetpcyopkz4.jpg',
                 'public_id' => 'gfceerybtfqsizsrtsls',
                 'created_at' => '2024-10-04 06:00:00',
                 'updated_at' => '2024-10-04 06:10:00'
@@ -64,7 +64,7 @@ class ProductsTableSeeder extends Seeder
                 'price' => 350000,
                 'discount' => 10,
                 'status' => 1,
-                'thumbnail' => 'https://example.com/image5.jpg',
+                'thumbnail' => 'https://res.cloudinary.com/dkfedhd63/image/upload/v1730736293/tdxnl4uoedetpcyopkz4.jpg',
                 'public_id' => 'u7ouyfkiagdpusmmfhdh',
                 'created_at' => '2024-10-05 07:00:00',
                 'updated_at' => '2024-10-05 07:15:00'
@@ -75,10 +75,10 @@ class ProductsTableSeeder extends Seeder
                 'price' => 80000,
                 'discount' => 0,
                 'status' => 1,
-                'thumbnail' => 'https://example.com/image6.jpg',
-                'public_id' => 'cap1exampleid',
-                'created_at' => '2024-10-06 08:00:00',
-                'updated_at' => '2024-10-06 08:10:00'
+                'thumbnail' => 'https://res.cloudinary.com/dkfedhd63/image/upload/v1730736293/tdxnl4uoedetpcyopkz4.jpg',
+                'public_id' => 's6r5gsa9yacxdqnta2m8',
+                'created_at' => '2024-10-18 22:59:31',
+                'updated_at' => '2024-10-18 22:59:31'
             ],
             [
                 'name' => 'Quần jean nữ',
@@ -86,10 +86,10 @@ class ProductsTableSeeder extends Seeder
                 'price' => 320000,
                 'discount' => 12,
                 'status' => 1,
-                'thumbnail' => 'https://example.com/image7.jpg',
-                'public_id' => 'jean1exampleid',
-                'created_at' => '2024-10-07 09:00:00',
-                'updated_at' => '2024-10-07 09:10:00'
+               'thumbnail' => 'https://res.cloudinary.com/dkfedhd63/image/upload/v1730736293/tdxnl4uoedetpcyopkz4.jpg',
+                'public_id' => 's6r5gsa9yacxdqnta2m8',
+                'created_at' => '2024-10-19 00:45:46',
+                'updated_at' => '2024-10-19 00:45:46'
             ],
             [
                 'name' => 'Áo khoác gió',
@@ -174,10 +174,10 @@ class ProductsTableSeeder extends Seeder
                 'price' => 60000,
                 'discount' => 0,
                 'status' => 1,
-                'thumbnail' => 'https://example.com/image15.jpg',
-                'public_id' => 'beanie1exampleid',
-                'created_at' => '2024-10-15 17:00:00',
-                'updated_at' => '2024-10-15 17:10:00'
+              'thumbnail' => 'https://res.cloudinary.com/dkfedhd63/image/upload/v1730736293/tdxnl4uoedetpcyopkz4.jpg',
+                'public_id' => 's6r5gsa9yacxdqnta2m8',
+                'created_at' => '2024-10-19 00:48:53',
+                'updated_at' => '2024-10-19 00:48:53'
             ],
             [
                 'name' => 'Đầm maxi',

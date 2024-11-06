@@ -28,9 +28,12 @@ class CartModel extends Model
 
         $userId = $user->id;
 
-        // Lấy các sản phẩm trong giỏ hàng của người dùng, tự động loại bỏ bản ghi đã xóa mềm
-        $cartItems = CartModel::with(['productVariant.product', 'productVariant.size', 'productVariant.color'])
+        $cartItems = CartModel::with(['productVariant.size', 'productVariant.color'])
             ->where('user_id', $userId)
+            ->whereHas('productVariant.product', function ($query) {
+                $query->whereNull('deleted_at');
+            })
+            ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($cart) {
                 return [
@@ -47,7 +50,6 @@ class CartModel extends Model
         return response()->json(['cart' => $cartItems], 200);
     }
 
-
     public static function deleteItemFromCart($request)
     {
         $user = JWTAuth::parseToken()->authenticate();
@@ -63,13 +65,12 @@ class CartModel extends Model
             return response()->json(['error' => 'Variant ID is required'], 400);
         }
 
-        // Sử dụng Eloquent Model để xóa mềm
         $deleted = CartModel::where('user_id', $userId)
             ->where('product_variant_id', $variantId)
             ->first();
 
         if ($deleted) {
-            $deleted->delete(); // Gọi hàm delete() từ Eloquent Model
+            $deleted->delete();
             return response()->json(['message' => 'Item removed from cart successfully'], 200);
         } else {
             return response()->json(['error' => 'Item not found in cart'], 404);
@@ -95,16 +96,26 @@ class CartModel extends Model
             return response()->json(['error' => 'Quantity must be a positive integer'], 400);
         }
 
-        // Tìm sản phẩm trong giỏ hàng
+        // Kiểm tra số lượng tồn kho trong product_variant
+        $productVariant = ProductVariantModel::find($variantId);
+
+        if (!$productVariant) {
+            return response()->json(['error' => 'Product variant not found'], 404);
+        }
+
+        if ($quantity > $productVariant->quantity) {
+            return response()->json([
+                'error' => 'Requested quantity exceeds available stock',
+            ], 400);
+        }
+
         $cartItem = CartModel::where('user_id', $userId)
             ->where('product_variant_id', $variantId)
             ->first();
 
         if ($cartItem) {
-            // Cập nhật số lượng sản phẩm
             $cartItem->quantity = $quantity;
-            $cartItem->save(); // Lưu thay đổi
-
+            $cartItem->save();
             return response()->json(['message' => 'Quantity updated successfully'], 200);
         } else {
             return response()->json(['error' => 'Item not found in cart'], 404);

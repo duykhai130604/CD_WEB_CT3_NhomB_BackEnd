@@ -16,7 +16,13 @@ class OrderModel extends Model
 {
     use HasFactory;
     protected $table = 'orders';
-
+    protected $fillable = [
+        'user_id',
+        'amount',
+        'phone',
+        'address',
+        'status',
+    ];
       public function getProductOrdersWithVariants($userId)
         {
             return DB::table('product_order as po')
