@@ -74,6 +74,6 @@ class User extends Authenticatable implements JWTSubject
         ->selectRaw('COUNT(blogs.id) as blog_count')
         ->join('blogs', 'users.id', '=', 'blogs.user_id')
         ->groupBy('users.id')
-        ->get();
+        ->paginate(5);
     }
 }

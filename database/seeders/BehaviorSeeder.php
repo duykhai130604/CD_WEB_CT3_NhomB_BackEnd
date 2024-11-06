@@ -14,9 +14,9 @@ class BehaviorSeeder extends Seeder
         
         for ($i = 0; $i < 1000; $i++) {
             Behavior::create([
-                'user_id' => $faker->numberBetween(1, 5),
+                'user_id' => $faker->numberBetween(1,20),
                 'action' => $faker->randomElement(['click', 'follow']),
-                'product_id' => $faker->numberBetween(1, 8),
+                'product_id' => $faker->numberBetween(1, 20),
                 'created_at' => $faker->dateTimeThisYear(),
                 'updated_at' => now(),
             ]);
