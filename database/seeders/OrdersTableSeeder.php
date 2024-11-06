@@ -14,11 +14,11 @@ class OrdersTableSeeder extends Seeder
     public function run()
     {
         DB::table('orders')->insert([
-            [ 'user_id' => 1, 'phone'=> '0377661111', 'amount' => 500000, 'address' => '123 Đường ABC', 'status' => 1, 'created_at' => '2024-10-01 03:00:00', 'updated_at' => '2024-10-01 03:05:00'],
-            [ 'user_id' => 2,'phone'=> '0377661111',  'amount' => 300000, 'address' => '456 Đường DEF', 'status' => 1, 'created_at' => '2024-10-02 04:00:00', 'updated_at' => '2024-10-02 04:05:00'],
-            [ 'user_id' => 1, 'phone'=> '0377661111', 'amount' => 700000, 'address' => '789 Đường GHI', 'status' => 2, 'created_at' => '2024-10-03 05:00:00', 'updated_at' => '2024-10-03 05:10:00'],
-            [ 'user_id' => 3,'phone'=> '0377661111',  'amount' => 1000000, 'address' => '321 Đường JKL', 'status' => 1, 'created_at' => '2024-10-04 06:00:00', 'updated_at' => '2024-10-04 06:15:00'],
-            [ 'user_id' => 2, 'phone'=> '0377661111', 'amount' => 250000, 'address' => '654 Đường MNO', 'status' => 1, 'created_at' => '2024-10-05 07:00:00', 'updated_at' => '2024-10-05 07:10:00'],
+            [ 'user_id' => 1, 'phone'=> '0377661111', 'amount' => 500000, 'address' => '123 Đường ABC', 'status' => 1, 'rate'=>false, 'created_at' => '2024-10-01 03:00:00', 'updated_at' => '2024-10-01 03:05:00'],
+            [ 'user_id' => 2,'phone'=> '0377661111',  'amount' => 300000, 'address' => '456 Đường DEF', 'status' => 1, 'rate'=>false, 'created_at' => '2024-10-02 04:00:00', 'updated_at' => '2024-10-02 04:05:00'],
+            [ 'user_id' => 1, 'phone'=> '0377661111', 'amount' => 700000, 'address' => '789 Đường GHI', 'status' => 2, 'rate'=>false, 'created_at' => '2024-10-03 05:00:00', 'updated_at' => '2024-10-03 05:10:00'],
+            [ 'user_id' => 3,'phone'=> '0377661111',  'amount' => 1000000, 'address' => '321 Đường JKL', 'status' => 1, 'rate'=>false, 'created_at' => '2024-10-04 06:00:00', 'updated_at' => '2024-10-04 06:15:00'],
+            [ 'user_id' => 2, 'phone'=> '0377661111', 'amount' => 250000, 'address' => '654 Đường MNO', 'status' => 1, 'rate'=>false, 'created_at' => '2024-10-05 07:00:00', 'updated_at' => '2024-10-05 07:10:00'],
         ]);
     }
 }
