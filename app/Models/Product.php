@@ -108,7 +108,7 @@ class Product extends Model
                     'id' => EncryptionModel::encodeId($product->id),
                     'name' => $product->name,
                     'desc' => $product->desc,
-                    'category_id' => $activeCategories->pluck('id'), // Lấy danh sách category_id còn tồn tại
+                    'category_id' => $activeCategories->pluck('id'),
                     'price' => $product->price,
                     'discount' => $product->discount,
                     'status' => $product->status,
@@ -129,10 +129,6 @@ class Product extends Model
             ], 422);
         }
     }
-
-
-
-
 
     /**
      * Thêm sản phẩm mới vào cơ sở dữ liệu.
@@ -161,7 +157,9 @@ class Product extends Model
             'desc.max' => 'The length of description must be between 1 and 2000 characters',
 
             'image.required' => 'Image is required',
-            'image.image' => 'The file must be an image'
+            'image.image' => 'Format images only include .jpg, .png, .gif',
+            'image.mimes' => 'Format images only include .jpg, .png, .gif',
+            'image.max' => 'Image size must be < 5 MB',
         ];
 
         $validator = Validator::make($request->all(), [
@@ -170,7 +168,7 @@ class Product extends Model
             'discount' => 'nullable|integer|between:0,100',
             'categories' => 'required|array|exists:categories,id',
             'desc' => 'required|max:2000',
-            'image' => 'required|image'
+            'image' => 'required|image|mimes:jpg,png,gif|max:5120',
         ], $messages);
 
         if ($validator->fails()) {
@@ -181,7 +179,7 @@ class Product extends Model
                 'discount' => $errors->first('discount'),
                 'categories' => $errors->first('categories'),
                 'desc' => $errors->first('desc'),
-                'image' => $errors->first('image'),
+                'image' => $validator->errors()->first('image'),
             ];
 
             return response()->json([
@@ -191,7 +189,6 @@ class Product extends Model
         }
 
         try {
-            // Upload ảnh và lấy URL cùng public_id
             $uploadResult = CloudinaryModel::uploadImage($request->file('image'));
             if ($uploadResult['status'] !== 'success') {
                 return response()->json([

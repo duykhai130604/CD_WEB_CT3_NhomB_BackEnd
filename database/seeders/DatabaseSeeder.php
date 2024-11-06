@@ -20,10 +20,10 @@ class DatabaseSeeder extends Seeder
             ProductCategoryTableSeeder::class,
             ProductVariantsTableSeeder::class,
             ProductImagesTableSeeder::class,
-            OrdersTableSeeder::class,
+            //OrdersTableSeeder::class,
             ReviewsTableSeeder::class,
             CartsTableSeeder::class,
-            ProductOrderTableSeeder::class,
+            //ProductOrderTableSeeder::class,
             CommentsTableSeeder::class,
             BlogsTableSeeder::class,
             UsersTableSeeder::class

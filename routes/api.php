@@ -15,6 +15,7 @@ use App\Http\Controllers\BlogController;
 use Illuminate\Support\Facades\Crypt;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ColorController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductVariantController;
 use App\Http\Controllers\SizeController;
 use App\Http\Middleware\RoleMiddleware;
@@ -45,7 +46,7 @@ Route::middleware(['role:admin'])->get('/test-role', function () {
     return response()->json(['message' => 'Role middleware applied']);
 });
 
-
+Route::get('/checkProduct', [ProductController::class, 'checkProduct']);
 Route::post('/admin/addProduct', [ProductController::class, 'addProduct']);
 Route::post('/admin/editProduct', [ProductController::class, 'editProduct']);
 Route::delete('/admin/deleteProduct', [ProductController::class, 'deleteProduct']);
@@ -70,11 +71,14 @@ Route::get('/getAllSizes', [SizeController::class, 'getAllSizes']);
 Route::get('/getAllColors', [ColorController::class, 'getAllColors']);
 Route::post('/admin/addProductVariant', [ProductVariantController::class, 'addProductVariant']);
 Route::delete('/admin/deleteProductVariant', [ProductVariantController::class, 'deleteProductVariant']);
+Route::post('/admin/editProductVariant',[ProductVariantController::class,'editProductVariant']);
+Route::get('/getVariantByVariantId',[ProductVariantController::class, 'getVariantByVariantId']);
 
 // CART
 Route::get('/getCarts', [CartController::class, 'getCartByUserId']);
 Route::delete("/deleteCartItem",[CartController::class,"deleteCartItem"]);
 Route::put('/updateCartItem', [CartController::class, 'updateCartItem']);
+Route::post('/checkout', [PaymentController::class, 'checkout']);
 // category manage
 Route::get('/categories', [CategoryController::class, 'getCategoriesByPage']);
 
@@ -109,6 +113,9 @@ Route::post('login', [AuthController::class, 'login']);
 
 Route::middleware(['custom.auth'])->get('me', [AuthController::class, 'me']);
 Route::middleware(['custom.auth'])->post('logout', [AuthController::class, 'logout']);
+
+Route::middleware(['custom.auth'])->get('get-role', [AuthController::class, 'getRole']);
+
 //CRUD BLOG
 Route::get('/blog/{id}', [BlogController::class, 'getBlogById']);
 Route::get('/blogs', [BlogController::class, 'getAllBlogs']);
