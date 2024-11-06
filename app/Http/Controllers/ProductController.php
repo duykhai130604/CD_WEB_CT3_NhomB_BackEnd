@@ -97,26 +97,40 @@ class ProductController extends Controller
         $products = Product::getProductsBySimilarNameAndCategory($decryptedId);
 
         return response()->json($products,);
-    }
-
+    }    
     public function getProductbyID($id)
     {
-        ///bạn phải viết hàm lấy product từ model
-        // $product = Product::find($id);
+        // Giải mã ID đã mã hóa
         $decryptedId = Crypt::decrypt($id);
+        
+        // Lấy sản phẩm từ model
         $productModel = new Product();
         $product = $productModel->getProductById($decryptedId);
+        
+        // Kiểm tra nếu sản phẩm không tồn tại
         if (!$product) {
             return response()->json(['message' => 'Product not found'], 404);
         }
-        $user = JWTAuth::parseToken()->authenticate();
+    
+        // Kiểm tra nếu có JWT token, nếu không thì gán user là null
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+        } catch (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
+            $user = null;
+        } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
+            $user = null;
+        } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
+            $user = null;
+        }
+    
         if (!$user) {
-            Behavior::trackProductClick($product->id,null);
+            Behavior::trackProductClick($product->id, null); // Không có user
+        } else {
+            Behavior::trackProductClick($product->id, $user->id); // Có user
         }
-        else{
-            $userId = $user->id;
-            Behavior::trackProductClick($product->id,$userId);
-        }
+    
+        // Trả về sản phẩm
         return response()->json($product, 200);
     }
+    
 }
