@@ -187,47 +187,13 @@ class ProductVariantModel extends Model
             }
 
             DB::commit();
-            return response()->json(['status' => 'success', 'message' => 'Product variant and images uploaded successfully.'], 200);
+            return response()->json(['status' => 'success', 'message' => 'Add new variant successful.'], 200);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['status' => 'error', 'message' => 'System error, please try again later'], 500);
         }
     }
 
-
-
-    // Delete variant
-    // public static function deleteProductVariantWithImages($request)
-    // {
-    //     $variantId = EncryptionModel::decodeId($request->input('variant_id'));
-    //     DB::beginTransaction();
-    //     try {
-    //         $variant = DB::table('product_variants')->where('id', $variantId)->first();
-    //         if (!$variant) {
-    //             return response()->json(['status' => 'error', 'message' => 'Product variant not found.'], 404);
-    //         }
-    //         $images = DB::table('product_images')->where('variant_id', $variantId)->get();
-    //         foreach ($images as $image) {
-    //             $deletionResult = CloudinaryModel::deleteImage($image->public_id);
-
-    //             if ($deletionResult['status'] !== 'success') {
-    //                 DB::rollBack();
-    //                 return response()->json([
-    //                     'status' => 'error',
-    //                     'message' => "Failed to delete image with ID: {$image->public_id}."
-    //                 ], 500);
-    //             }
-    //             DB::table('product_images')->where('id', $image->id)->delete();
-    //         }
-
-    //         DB::table('product_variants')->where('id', $variantId)->delete();
-    //         DB::commit();
-    //         return response()->json(['status' => 'success', 'message' => 'Product variant and images deleted successfully.'], 200);
-    //     } catch (\Exception $e) {
-    //         DB::rollBack();
-    //         return response()->json(['status' => 'error', 'message' => 'System error, please try again later'], 500);
-    //     }
-    // }
     public static function deleteProductVariant($request)
     {
         $variantId = EncryptionModel::decodeId($request->input('variant_id'));
@@ -239,16 +205,15 @@ class ProductVariantModel extends Model
             }
             $variant->delete();
             DB::commit();
-            return response()->json(['status' => 'success', 'message' => 'Product variant deleted successfully.'], 200);
+            return response()->json(['status' => 'success', 'message' => 'Delete variant successful.'], 200);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['status' => 'error', 'message' => 'System error, please try again later'], 500);
+            return response()->json(['status' => 'error', 'message' => 'Delete variant unsuccessful'], 500);
         }
     }
     // Edit variant
     public static function editVariant($request)
     {
-        Log::info("All", $request->all());
         // Lấy ID biến thể từ request
         $variantId = EncryptionModel::decodeId($request->input('variant_id'));
         $decodedColorId = EncryptionModel::decodeId($request->input('color_id'));
@@ -422,7 +387,7 @@ class ProductVariantModel extends Model
         ->join('colors as c', 'pv.color_id', '=', 'c.id')
         ->join('sizes as s', 'pv.size_id', '=', 's.id')
         ->join('product_images as pi', 'pi.variant_id', '=', 'pv.id')
-        ->where('p.id', $id) 
+        ->where('p.id', $id)
         ->select('c.name as color', 's.name as size', 'pv.quantity', 'pi.url')
         ->get();
 }
