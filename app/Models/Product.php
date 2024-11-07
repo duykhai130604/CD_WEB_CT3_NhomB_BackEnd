@@ -250,7 +250,9 @@ class Product extends Model
             'categories.min' => 'At least one category must be valid.',
             'desc.required' => 'Required field',
             'desc.max' => 'The length of description must be between 1 and 2000 characters',
-            'image.image' => 'The file must be an image'
+            'image.image' => 'Format images only include .jpg, .png, .gif',
+            'image.mimes' => 'Format images only include .jpg, .png, .gif',
+            'image.max' => 'Image size must be < 5 MB',
         ];
 
         $validator = Validator::make($request->all(), [
@@ -259,7 +261,7 @@ class Product extends Model
             'discount' => 'nullable|integer|between:0,100',
             'categories' => 'required|array|exists:categories,id',
             'desc' => 'required|max:2000',
-            'image' => 'nullable|image'
+            'image' => 'nullable|image|mimes:jpg,png,gif|max:5120'
         ], $messages);
 
         if ($validator->fails()) {
@@ -286,13 +288,6 @@ class Product extends Model
             if (!$product) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'The product does not exist.'
-                ], 404);
-            }
-
-            if ($product->status == 0) { // Kiểm tra xem sản phẩm đã bị xóa chưa
-                return response()->json([
-                    'status' => 'error',
                     'message' => 'The product has been deleted.'
                 ], 404);
             }
@@ -311,7 +306,7 @@ class Product extends Model
                 return response()->json([
                     'status' => 'error',
                     'errors' => [
-                        'categories' => 'At least one category must be valid and not deleted.'
+                        'categories' => 'Invalid category selection'
                     ]
                 ], 422);
             }
@@ -443,7 +438,7 @@ class Product extends Model
             ->where('user_id', $userId)
             ->whereIn('action', ['click', 'follow'])
             ->pluck('product_id');
-    
+
         return DB::table('products as similar_products')
             ->select('similar_products.id', 'similar_products.name','similar_products.price'
             ,'similar_products.discount','similar_products.thumbnail') // Liệt kê các trường cần thiết từ `similar_products`
@@ -456,7 +451,7 @@ class Product extends Model
             ->orderByDesc('similarity_count')
             ->paginate(4);
     }
-    
+
     /* Lấy top sản phẩm mà user chưa tương tác hoặc chưa
     có user_id, sắp xếp ngẫu nhiên để tránh trùng lặp sản phẩm*/
     public static function getTopProductsByUserInteracted($userId)
