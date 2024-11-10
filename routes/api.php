@@ -18,6 +18,7 @@ use App\Http\Controllers\ColorController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductVariantController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SizeController;
 use App\Http\Middleware\RoleMiddleware;
 use App\Models\CloudinaryModel;
@@ -159,3 +160,4 @@ Route::get('/product/variants/{id}', [ProductVariantController::class, 'getProdu
 //---------------------------------------------------------------
 //get order by user
 Route::get('/user/orders', [OrderController::class, 'getOrdersByUser']);
+Route::post('/add-review', [ReviewController::class, 'store']);

@@ -9,6 +9,13 @@ use Illuminate\Support\Facades\DB;
 class ReviewModel extends Model
 {
     protected $table ='reviews';  
+    protected $fillable = [
+        'content',
+        'rating',
+        'user_id',
+        'variant',
+        'product_id'
+    ];
     // public function checkUserHaveRated($variant, $user){
     //     $reviewCount = DB::table('reviews')
     //     ->where('product_id', $variant)
@@ -21,6 +28,7 @@ class ReviewModel extends Model
             'content' => $data->content,
             'rating' => $data->rating,
             'user_id' => $data->user_id,
+            'variant' => $data->variant,
             'product_id' => $data->product_id,
         ]);
     }
