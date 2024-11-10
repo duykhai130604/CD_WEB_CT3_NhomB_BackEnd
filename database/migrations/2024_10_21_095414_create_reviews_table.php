@@ -17,6 +17,7 @@ return new class extends Migration
             $table->integer('rating'); 
             $table->integer('user_id');
             $table->integer('product_id');
+            $table->integer('variant');
             $table->timestamp('created_at')->nullable()->useCurrent();
             $table->timestamp('updated_at')->nullable()->useCurrentOnUpdate()->useCurrent();
         });

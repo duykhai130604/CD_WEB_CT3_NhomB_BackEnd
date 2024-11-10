@@ -15,6 +15,8 @@ return new class extends Migration
             $table->integer('product_variant_id');
             $table->integer('order_id');
             $table->integer('quantity');
+            $table->integer('total');
+            $table->boolean('rate');
             $table->timestamp('created_at')->nullable()->useCurrent();
             $table->timestamp('updated_at')->nullable()->useCurrentOnUpdate()->useCurrent();
         });
