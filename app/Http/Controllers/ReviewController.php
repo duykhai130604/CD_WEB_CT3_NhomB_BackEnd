@@ -42,4 +42,28 @@ class ReviewController extends Controller
             ], 500);
         }
     }
+    public function index(Request $request){
+            $decrypted = Crypt::decrypt($request->id);
+        try {
+            $reviews = ReviewModel::getReviewByProduct($decrypted);
+            return response()->json($reviews, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+               'message' => 'Failed to get reviews',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+    public function getRating(Request $request){
+        $decrypted = Crypt::decrypt($request->id);
+        try {
+            $rating = ReviewModel::getRating($decrypted);
+            return response()->json($rating, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+               'message' => 'Failed to get reviews',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
