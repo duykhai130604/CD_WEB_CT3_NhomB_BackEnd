@@ -161,3 +161,5 @@ Route::get('/product/variants/{id}', [ProductVariantController::class, 'getProdu
 //get order by user
 Route::get('/user/orders', [OrderController::class, 'getOrdersByUser']);
 Route::post('/add-review', [ReviewController::class, 'store']);
+Route::get('/reviews/{id}', [ReviewController::class, 'index']);
+Route::get('product/{id}/rating', [ReviewController::class, 'getRating']);
