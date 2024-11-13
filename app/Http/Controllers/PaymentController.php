@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\OrderConfirmationMail;
 use App\Models\CartModel;
 use App\Models\OrderModel;
 use App\Models\Product;
@@ -11,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Response;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -118,6 +120,7 @@ class PaymentController extends Controller
                     }
                 }
 
+                Mail::to($user->email)->send(new OrderConfirmationMail($order, $user, $totalAmount));
                 // Xóa giỏ hàng của người dùng sau khi thanh toán thành công
                 CartModel::where('user_id', $userId)->delete();
 
