@@ -163,3 +163,4 @@ Route::get('/user/orders', [OrderController::class, 'getOrdersByUser']);
 Route::post('/add-review', [ReviewController::class, 'store']);
 Route::get('/reviews/{id}', [ReviewController::class, 'index']);
 Route::get('product/{id}/rating', [ReviewController::class, 'getRating']);
+Route::get('get-product-rating-range/{rating}', [HomeController::class, 'getProductByRatingRange']);

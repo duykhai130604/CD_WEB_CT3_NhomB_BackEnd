@@ -430,6 +430,8 @@ class Product extends Model
             ->selectRaw('count(behaviors.id) as action_count')
             ->groupBy('products.id')
             ->orderByDesc('action_count')
+            ->withCount('ratings')
+            ->withAvg('ratings', 'rating')
             ->paginate(4);
     }
     public static function getTopProductsByUserNotInteracted($userId)
@@ -440,8 +442,13 @@ class Product extends Model
             ->pluck('product_id');
 
         return DB::table('products as similar_products')
-            ->select('similar_products.id', 'similar_products.name','similar_products.price'
-            ,'similar_products.discount','similar_products.thumbnail') // Liệt kê các trường cần thiết từ `similar_products`
+            ->select(
+                'similar_products.id',
+                'similar_products.name',
+                'similar_products.price',
+                'similar_products.discount',
+                'similar_products.thumbnail'
+            ) // Liệt kê các trường cần thiết từ `similar_products`
             ->join('product_category as pc_user', 'pc_user.product_id', '=', 'similar_products.id')
             ->join('product_category as pc_similar', 'pc_user.category_id', '=', 'pc_similar.category_id')
             ->join('products', 'products.id', '=', 'pc_similar.product_id')
@@ -449,6 +456,8 @@ class Product extends Model
             ->selectRaw('COUNT(pc_similar.category_id) as similarity_count')
             ->groupBy('similar_products.id', 'similar_products.name') // Nhóm theo các cột đã chọn
             ->orderByDesc('similarity_count')
+            ->withCount('ratings')
+            ->withAvg('ratings', 'rating')
             ->paginate(4);
     }
 
@@ -521,5 +530,24 @@ class Product extends Model
     public function getProductById($id)
     {
         return self::findOrFail($id);
+    }
+    public function ratings()
+    {
+        return $this->hasMany(ReviewModel::class);
+    }
+    public static function getNewProducts()
+    {
+        return self::withCount('ratings')
+            ->withAvg('ratings', 'rating')
+            ->orderBy('created_at', 'desc')
+            ->paginate(8);
+    }
+    public static function getProductsByRatingRange($minRating)
+    {
+        return self::withCount('ratings')
+        ->withAvg('ratings', 'rating')
+        ->having('ratings_avg_rating', '>=', $minRating)
+        ->having('ratings_avg_rating', '<=', 5) 
+        ->paginate(8);
     }
 }
