@@ -40,6 +40,7 @@ class CartModel extends Model
                     'variant_quantity' => $cart->quantity,
                     'product_name' => $cart->productVariant->product->name ?? null,
                     'product_price' => $cart->productVariant->product->price ?? null,
+                    'product_discount' => $cart->productVariant->product->discount ?? null,
                     'product_thumbnail' => $cart->productVariant->product->thumbnail ?? null,
                     'size_name' => $cart->productVariant->size->name ?? null,
                     'color_name' => $cart->productVariant->color->name ?? null,

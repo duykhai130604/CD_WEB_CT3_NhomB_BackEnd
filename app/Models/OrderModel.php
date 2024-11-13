@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-/* 
+/*
 1: Đã giao thành công
 0: Bị hủy bởi admin
 2: bị hủy bởi khác hàng
@@ -16,7 +16,14 @@ class OrderModel extends Model
 {
     use HasFactory;
     protected $table = 'orders';
-
+    protected $fillable = [
+        'user_id',
+        'amount',
+        'phone',
+        'address',
+        'status',
+        'rate',
+    ];
       public function getProductOrdersWithVariants($userId)
         {
             return DB::table('product_order as po')
@@ -30,7 +37,7 @@ class OrderModel extends Model
                 ->where('u.id', $userId)
                 ->where('po.rate', '=',0)
                 ->select('p.name as name','p.thumbnail','po.total','s.name as size','c.name as color','po.quantity','po.rate','o.id as order','p.id as product','pv.id as variant')
-                ->orderBy('po.created_at','desc')->paginate(10);    
+                ->orderBy('po.created_at','desc')->paginate(10);
     }
-    
+
 }
