@@ -388,7 +388,7 @@ class ProductVariantModel extends Model
         ->join('sizes as s', 'pv.size_id', '=', 's.id')
         ->join('product_images as pi', 'pi.variant_id', '=', 'pv.id')
         ->where('p.id', $id)
-        ->select('c.name as color', 's.name as size', 'pv.quantity', 'pi.url')
+        ->select('c.name as color', 's.name as size', 'pv.quantity', 'pi.url','pv.id as id')
         ->get();
 }
 }

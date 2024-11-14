@@ -10,9 +10,13 @@ class HomeController extends Controller
 {
     public function getTopProducts()
     {
-        // Giả sử có một trường `sales` để xác định sản phẩm bán chạy
-        $topProducts = Product::orderBy('created_at', 'desc')->take(10)->get();
+        $topProducts = Product::getNewProducts();
 
         return response()->json($topProducts);
+    }
+    public function getProductByRatingRange(Request $request)
+    {
+        $products = Product::getProductsByRatingRange($request->rating);
+        return response()->json($products);
     }
 }
