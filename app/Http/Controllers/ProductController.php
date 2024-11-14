@@ -50,6 +50,15 @@ class ProductController extends Controller
         }
         return response()->json(['message' => 'Product Not Found.'], 404);
     }
+    public function getProductByCategoryIdAndPage($cateId)
+    {
+        $decryptedId = Crypt::decrypt($cateId);
+        $products = Product::getProductsByCategoryAndPage($decryptedId);
+        if ($products) {
+            return response()->json($products, 200);
+        }
+        return response()->json(['message' => 'Product Not Found.'], 404);
+    }
     public function getTopProducts()
     {
         $topProducts = Product::getTopProducts();

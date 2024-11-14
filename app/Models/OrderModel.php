@@ -35,7 +35,6 @@ class OrderModel extends Model
                 ->join('sizes as s', 'pv.size_id', '=', 's.id')
                 ->join('colors as c', 'pv.color_id', '=', 'c.id')
                 ->where('u.id', $userId)
-                ->where('po.rate', '=',0)
                 ->select('p.name as name','p.thumbnail','po.total','s.name as size','c.name as color','po.quantity','po.rate','o.id as order','p.id as product','pv.id as variant')
                 ->orderBy('po.created_at','desc')->paginate(10);
     }

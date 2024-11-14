@@ -22,6 +22,7 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SizeController;
 use App\Http\Middleware\RoleMiddleware;
 use App\Models\CloudinaryModel;
+use App\Models\Product;
 
 /*
 |--------------------------------------------------------------------------
@@ -120,7 +121,7 @@ Route::middleware(['custom.auth'])->get('get-role', [AuthController::class, 'get
 
 //CRUD BLOG
 Route::get('/blog/{id}', [BlogController::class, 'getBlogById']);
-Route::get('/blogs', [BlogController::class, 'getAllBlogs']);
+Route::get('/blogs', [BlogController::class, 'getBlogByPage']);
 Route::post('/add-blog', [BlogController::class, 'addBlog']);
 Route::post('/update-blog', [BlogController::class, 'updateBlog']);
 Route::put('/blog/change-status/{id}', [BlogController::class, 'changeBlog']);
@@ -164,3 +165,7 @@ Route::post('/add-review', [ReviewController::class, 'store']);
 Route::get('/reviews/{id}', [ReviewController::class, 'index']);
 Route::get('product/{id}/rating', [ReviewController::class, 'getRating']);
 Route::get('get-product-rating-range/{rating}', [HomeController::class, 'getProductByRatingRange']);
+// get category for filter
+Route::get('categories-filter', [CategoryController::class, 'index']);
+Route::get('product-category/{id}', [ProductController::class, 'getProductByCategoryIdAndPage']);
+
