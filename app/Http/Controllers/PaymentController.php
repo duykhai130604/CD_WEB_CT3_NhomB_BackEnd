@@ -54,7 +54,8 @@ class PaymentController extends Controller
         $totalAmount = 0;
         foreach ($carts as $cart) {
             try {
-                $totalAmount += $cart->quantity * $this->getProductPrice($cart->product_variant_id);
+                $productPrice = $this->getProductPrice($cart->product_variant_id);
+                $totalAmount += $cart->quantity * $productPrice;
             } catch (\Exception $e) {
                 return response()->json(['message' => $e->getMessage()], 400);
             }
@@ -74,18 +75,21 @@ class PaymentController extends Controller
 
             // Tạo đơn hàng liên quan đến từng sản phẩm trong giỏ
             foreach ($carts as $cart) {
+                $productPrice = $this->getProductPrice($cart->product_variant_id);
+                $variantTotal = $productPrice * $cart->quantity; // Tính tổng tiền cho biến thể này
+
                 ProductOrderModel::create([
                     'product_variant_id' => $cart->product_variant_id,
                     'order_id' => $order->id,
                     'quantity' => $cart->quantity,
+                    'total' => $variantTotal,
                 ]);
             }
 
-            // 6. Kiểm tra lại tồn kho trước khi giảm số lượng
+            // Kiểm tra lại tồn kho và thực hiện các bước còn lại
             foreach ($carts as $cart) {
                 $productVariant = ProductVariantModel::find($cart->product_variant_id);
                 if ($productVariant && $productVariant->quantity < $cart->quantity) {
-                    // Nếu kho không đủ, rollback giao dịch
                     DB::rollBack();
                     return response()->json([
                         'message' => "Số lượng sản phẩm {$productVariant->product->name} không đủ trong kho. Chỉ còn {$productVariant->quantity} sản phẩm.",
@@ -93,7 +97,7 @@ class PaymentController extends Controller
                 }
             }
 
-            // Gọi MoMo API để thực hiện thanh toán
+            // Gọi MoMo API và xử lý kết quả thanh toán
             $paymentRequest = new Request([
                 'orderInfo' => "Thanh toán đơn hàng #{$order->id}",
                 'amount' => $totalAmount,
@@ -105,7 +109,6 @@ class PaymentController extends Controller
             $paymentResponse = $this->createPayment($paymentRequest);
             $paymentResponseData = $paymentResponse->getData();
 
-            // Kiểm tra kết quả thanh toán và commit transaction
             if (isset($paymentResponseData->payUrl)) {
                 DB::commit();
 
@@ -113,15 +116,12 @@ class PaymentController extends Controller
                 foreach ($carts as $cart) {
                     $productVariant = ProductVariantModel::find($cart->product_variant_id);
                     if ($productVariant) {
-                        // Giảm số lượng trong kho
                         $productVariant->quantity -= $cart->quantity;
-                        // Lưu lại thay đổi
                         $productVariant->save();
                     }
                 }
 
                 Mail::to($user->email)->send(new OrderConfirmationMail($order, $user, $totalAmount));
-                // Xóa giỏ hàng của người dùng sau khi thanh toán thành công
                 CartModel::where('user_id', $userId)->delete();
 
                 return response()->json([
@@ -137,6 +137,7 @@ class PaymentController extends Controller
             return response()->json(['message' => 'Đã xảy ra lỗi trong quá trình thanh toán. Vui lòng thử lại sau. ' . $e->getMessage()], 500);
         }
     }
+
 
 
     public function getProductPrice($productVariantId): int
