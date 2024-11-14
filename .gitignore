@@ -19,3 +19,5 @@ yarn-error.log
 /nginx
 /docker-compose.yml
 /Dockerfile
+app/Events/MessageSent.php
+app/Http/Controllers/ChatController.php

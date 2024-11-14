@@ -16,7 +16,7 @@ return new class extends Migration
             $table->integer('order_id');
             $table->integer('quantity');
             $table->integer('total');
-            $table->boolean('rate');
+            $table->integer('rate')->default(0);
             $table->timestamp('created_at')->nullable()->useCurrent();
             $table->timestamp('updated_at')->nullable()->useCurrentOnUpdate()->useCurrent();
         });
