@@ -17,4 +17,8 @@ class CartController extends Controller
     public function updateCartItem(Request $request) {
         return CartModel::updateQuantityInCart($request);
     }
+    public function addToCart(Request $request)
+     {
+        return CartModel::addToCart($request);
+    }
 }

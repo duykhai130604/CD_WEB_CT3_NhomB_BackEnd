@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class CartModel extends Model
@@ -14,6 +16,7 @@ class CartModel extends Model
     use HasFactory;
     use SoftDeletes;
     protected $table = 'carts';
+    protected $fillable = ['user_id', 'quantity','product_variant_id'];
     public function productVariant()
     {
         return $this->belongsTo(ProductVariantModel::class, 'product_variant_id');
@@ -120,6 +123,53 @@ class CartModel extends Model
             return response()->json(['message' => 'Quantity updated successfully'], 200);
         } else {
             return response()->json(['error' => 'Item not found in cart'], 404);
+        }
+    }
+
+    public static function addToCart($request)
+    {
+        try {
+            // Xác thực người dùng qua JWT token
+            $user = JWTAuth::parseToken()->authenticate();
+            $userId = $user->id;
+
+            // Xác thực các tham số đầu vào
+            $validated = $request->validate([
+                'product_variant_id' => 'required|integer|exists:product_variants,id',
+            ]);
+
+            $productVariantId = $validated['product_variant_id']; // Dùng validated thay vì input trực tiếp
+
+            // Kiểm tra sự tồn tại của sản phẩm variant trong cơ sở dữ liệu
+            $productVariant = ProductVariantModel::find($productVariantId);
+            if (!$productVariant) {
+                return response()->json(['message' => 'Product Not Found'], 404);
+            }
+
+            // Tìm sản phẩm trong giỏ hàng của người dùng
+            $cartItem = CartModel::where('user_id', $userId)
+                ->where('product_variant_id', $productVariantId)
+                ->first();
+
+            if ($cartItem) {
+                // Nếu sản phẩm đã có trong giỏ hàng
+                return response()->json(['message' => 'Sản phẩm đã tồn tại trong giỏ hàng.'], 400);
+            } else {
+                // Nếu sản phẩm chưa có trong giỏ hàng, thêm vào giỏ
+                CartModel::create([
+                    'user_id' => $userId,
+                    'product_variant_id' => $productVariantId,
+                    'quantity' => 1, // Default quantity
+                ]);
+
+                return response()->json(['message' => 'Sản phẩm đã được thêm vào giỏ hàng.'], 200);
+            }
+        } catch (JWTException $e) {
+            // Xử lý lỗi nếu token không hợp lệ hoặc hết hạn
+            return response()->json(['message' => 'Token không hợp lệ hoặc đã hết hạn.'], 401);
+        } catch (\Exception $e) {
+            // Xử lý lỗi hệ thống
+            return response()->json(['message' => 'Đã xảy ra lỗi khi thêm vào giỏ hàng. Vui lòng thử lại sau.'. $e->getMessage()], 500);
         }
     }
 }

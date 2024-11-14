@@ -85,6 +85,7 @@ Route::get('/getCarts', [CartController::class, 'getCartByUserId']);
 Route::delete("/deleteCartItem",[CartController::class,"deleteCartItem"]);
 Route::put('/updateCartItem', [CartController::class, 'updateCartItem']);
 Route::post('/checkout', [PaymentController::class, 'checkout']);
+Route::post('/addToCart', [CartController::class, 'addToCart']);
 // category manage
 Route::get('/categories', [CategoryController::class, 'getCategoriesByPage']);
 
