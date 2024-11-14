@@ -13,5 +13,6 @@ class ProductOrderModel extends Model
         'product_variant_id',
         'order_id',
         'quantity',
+        'total'
     ];
 }
