@@ -77,7 +77,7 @@ class ProductController extends Controller
             return response()->json($topProducts);
          } catch (\Exception $e) {
          // Bắt lỗi nếu token không hợp lệ hoặc có lỗi khác
-             return response()->json(['error' => 'Token is invalid or expired'], 401);
+             return response()->json(['error' => $e->getMessage()], 401);
      }
     }
     public function getTopProductsByUserInteracted()
