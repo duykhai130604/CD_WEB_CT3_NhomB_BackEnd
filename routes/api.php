@@ -22,6 +22,7 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SizeController;
 use App\Http\Middleware\RoleMiddleware;
 use App\Models\CloudinaryModel;
+use App\Http\Controllers\ChatController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,6 +34,9 @@ use App\Models\CloudinaryModel;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+
+
+Route::post('/send-message', [ChatController::class, 'sendMessage']);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
