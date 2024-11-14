@@ -15,4 +15,5 @@ class ProductOrderModel extends Model
         'quantity',
         'total'
     ];
+    
 }

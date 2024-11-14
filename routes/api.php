@@ -166,6 +166,8 @@ Route::get('/product/variants/{id}', [ProductVariantController::class, 'getProdu
 //---------------------------------------------------------------
 //get order by user
 Route::get('/user/orders', [OrderController::class, 'getOrdersByUser']);
+Route::get('/orders', [OrderController::class, 'getOrders']);
+
 Route::post('/add-review', [ReviewController::class, 'store']);
 Route::get('/reviews/{id}', [ReviewController::class, 'index']);
 Route::get('product/{id}/rating', [ReviewController::class, 'getRating']);
@@ -174,3 +176,4 @@ Route::get('get-product-rating-range/{rating}', [HomeController::class, 'getProd
 Route::get('categories-filter', [CategoryController::class, 'index']);
 Route::get('product-category/{id}', [ProductController::class, 'getProductByCategoryIdAndPage']);
 
+Route::put('/product-order/update-status', [OrderController::class, 'updateStatus']);

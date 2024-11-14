@@ -18,4 +18,19 @@ class ProductOrder extends Model
                     ->where('order_id', $orderId)
                     ->update(['rate' => $newRate]);
     }
+    public static function updateStatusAndReason($id, $status, $reason)
+    {
+        $validStatuses = [0, 1, 2, 3, 4]; 
+        if (!in_array($status, $validStatuses)) {
+            return false; 
+        }
+        $productOrder = self::find($id);
+
+        if (!$productOrder) {
+            return false; 
+        }
+        $productOrder->status = $status;
+        $productOrder->reason = $reason;
+        return $productOrder->save(); 
+    }
 }

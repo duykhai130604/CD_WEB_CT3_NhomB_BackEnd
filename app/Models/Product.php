@@ -452,23 +452,22 @@ class Product extends Model
             ->whereIn('action', ['click', 'follow'])
             ->pluck('product_id');
 
-        return DB::table('products as similar_products')
-            ->select(
-                'similar_products.id',
-                'similar_products.name',
-                'similar_products.price',
-                'similar_products.discount',
-                'similar_products.thumbnail'
-            ) // Liệt kê các trường cần thiết từ `similar_products`
-            ->join('product_category as pc_user', 'pc_user.product_id', '=', 'similar_products.id')
+            return self::select(
+                'products.id',
+                'products.name',
+                'products.price',
+                'products.discount',
+                'products.thumbnail'
+            )
+            ->join('product_category as pc_user', 'pc_user.product_id', '=', 'products.id')
             ->join('product_category as pc_similar', 'pc_user.category_id', '=', 'pc_similar.category_id')
-            ->join('products', 'products.id', '=', 'pc_similar.product_id')
-            ->whereNotIn('similar_products.id', $interactedProductIds)
+            ->join('products as similar_products', 'similar_products.id', '=', 'pc_similar.product_id')
+            ->whereNotIn('products.id', $interactedProductIds)
             ->selectRaw('COUNT(pc_similar.category_id) as similarity_count')
-            ->groupBy('similar_products.id', 'similar_products.name') // Nhóm theo các cột đã chọn
+            ->groupBy('products.id', 'products.name')
             ->orderByDesc('similarity_count')
-            ->withCount('ratings')
-            ->withAvg('ratings', 'rating')
+            ->withCount('ratings')  
+            ->withAvg('ratings', 'rating')  
             ->paginate(4);
     }
 
@@ -517,6 +516,8 @@ class Product extends Model
             ->join('product_category', 'products.id', '=', 'product_category.product_id')
             ->whereIn('product_category.category_id', $categoryIds)
             ->where('products.id', '!=', $productId)
+            ->withCount('ratings')
+            ->withAvg('ratings', 'rating')
             ->distinct()
             ->get();
         // Khởi tạo mảng similarProducts rỗng
@@ -525,7 +526,9 @@ class Product extends Model
         foreach ($keywords as $keyword) {
             // Tìm sản phẩm tương tự theo từng từ khóa
             $products = self::where('products.name', 'LIKE', '%' . $keyword . '%')
-                ->where('products.id', '!=', $productId) // Loại bỏ sản phẩm chính nó
+                ->where('products.id', '!=', $productId) 
+                ->withCount('ratings')
+                ->withAvg('ratings', 'rating')// Loại bỏ sản phẩm chính nó
                 ->distinct()
                 ->get();
             // Thêm từng sản phẩm vào mảng similarProducts
@@ -561,4 +564,5 @@ class Product extends Model
         ->having('ratings_avg_rating', '<=', 5) 
         ->paginate(8);
     }
+    
 }
