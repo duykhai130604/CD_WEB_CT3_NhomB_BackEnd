@@ -16,7 +16,7 @@ class BlogController extends Controller
     }
     public function getBlogsByUserPage()
     {
-        $blogs = Blog::getBlogsByUserPage(3);
+        $blogs = Blog::getBlogsByUserPage();
         return $blogs;
     }
     public function getBlogById($encryptedId)

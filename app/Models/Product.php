@@ -421,6 +421,17 @@ class Product extends Model
             ->get();
         return $products->isEmpty() ? null : $products;
     }
+    public static function getProductsByCategoryAndPage($categoryId)
+    {
+        $products =  self::select('products.*')
+            ->join('product_category', 'products.id', '=', 'product_category.product_id')
+            ->join('categories', 'product_category.category_id', '=', 'categories.id')
+            ->where('categories.id', $categoryId)
+            ->withCount('ratings')
+            ->withAvg('ratings', 'rating')
+            ->paginate(8);
+        return $products->isEmpty() ? null : $products;
+    }
     // Lấy top sản phẩm khic chưa đăng nhập
     public static function getTopProducts()
     {

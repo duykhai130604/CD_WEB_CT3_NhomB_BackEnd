@@ -10,12 +10,17 @@ use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
+
     public function getCategoriesByPage()
     {
         $categories = Category::getCategoriesByPage(10);
         return $categories;
     }
-
+    public function index()
+    {
+        $categories = Category::getAllCategories();
+        return $categories;
+    }
     public function getCategoryById($encryptedId)
     {
         try {
