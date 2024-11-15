@@ -31,6 +31,11 @@ class OrderController extends Controller
         $orders = OrderModel::getOrderDetails();
         return response()->json($orders);
     }
+    public function getOrdersByDate($date)
+    {
+        $orders = OrderModel::getOrderDetailsByDate($date);
+        return response()->json($orders);
+    }
     public function updateStatus( Request $request)
     {
      
@@ -42,4 +47,5 @@ class OrderController extends Controller
 
         return response()->json(['message' => 'Product order updated successfully'], 200);
     }
+    
 }
