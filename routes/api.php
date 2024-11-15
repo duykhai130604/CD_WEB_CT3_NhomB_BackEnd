@@ -167,6 +167,7 @@ Route::get('/product/variants/{id}', [ProductVariantController::class, 'getProdu
 //get order by user
 Route::get('/user/orders', [OrderController::class, 'getOrdersByUser']);
 Route::get('/orders', [OrderController::class, 'getOrders']);
+Route::get('/orders-by-date/{date}', [OrderController::class, 'getOrdersByDate']);
 
 Route::post('/add-review', [ReviewController::class, 'store']);
 Route::get('/reviews/{id}', [ReviewController::class, 'index']);

@@ -36,13 +36,14 @@ class OrderModel extends Model
             ->join('sizes as s', 'pv.size_id', '=', 's.id')
             ->join('colors as c', 'pv.color_id', '=', 'c.id')
             ->where('u.id', $userId)
-            ->select('p.name as name', 'p.thumbnail', 'po.total', 's.name as size', 'c.name as color', 'po.quantity', 'po.rate', 'o.id as order', 'p.id as product', 'pv.id as variant', 'po.created_at as created_at')
+            ->select('po.id as id','p.name as name', 'p.thumbnail', 'po.total', 's.name as size', 'c.name as color', 'po.quantity', 'po.rate', 'o.id as order', 'p.id as product', 'pv.id as variant', 'po.created_at as created_at','po.status as status')
             ->orderBy('po.created_at', 'desc')->paginate(10);
     }
     public static function getOrderDetails()
     {
         return self::select(
             'product_order.id as id',
+            'product_order.created_at as created_at',
             'orders.user_id',
             'orders.amount',
             'orders.phone',
@@ -75,5 +76,44 @@ class OrderModel extends Model
             ->orderBy('orders.created_at', 'desc')
             ->paginate(10);
     }
-   
+    public static function getOrderDetailsByDate($date)  
+    {
+        return self::select(
+            'product_order.id as id',
+            'product_order.created_at as created_at',
+            'orders.user_id',
+            'orders.amount',
+            'orders.phone',
+            'orders.address',
+            'product_order.status as status',
+            'product_order.updated_at as cancle',
+            'orders.rate',
+            'orders.created_at as order_created_at',
+            'product_order.product_variant_id',
+            'product_order.quantity',
+            'product_order.total',
+            'product_order.reason',
+            'product_order.rate as product_order_rate',
+            'product_variants.id as product_variant_id',
+            'product_variants.product_id',
+            'products.id as product_id',
+            'products.name as product_name',
+            'products.price as product_price',
+            'sizes.name as size',
+            'colors.name as color',
+            'users.name as user',
+            'orders.phone as phone',
+        )
+            ->join('product_order', 'orders.id', '=', 'product_order.order_id')
+            ->join('product_variants', 'product_order.product_variant_id', '=', 'product_variants.id')
+            ->join('products', 'product_variants.product_id', '=', 'products.id')
+            ->join('sizes', 'sizes.id', '=', 'product_variants.size_id')
+            ->join('colors', 'colors.id', '=', 'product_variants.color_id')
+            ->join('users', 'users.id', '=', 'orders.user_id')
+            ->whereDate('product_order.created_at', $date)
+            ->orderBy('orders.created_at', 'desc')
+            ->paginate(10); 
+    }
+    
+    
 }
