@@ -179,3 +179,9 @@ Route::get('categories-filter', [CategoryController::class, 'index']);
 Route::get('product-category/{id}', [ProductController::class, 'getProductByCategoryIdAndPage']);
 
 Route::put('/product-order/update-status', [OrderController::class, 'updateStatus']);
+
+//purchase
+Route::get('/order-stats/{year}', [OrderController::class, 'getMonthlyOrderStats']);
+Route::get('/monthly-reason-stats', [OrderController::class, 'getMonthlyReasonStats']);
+Route::get('/order-cancled', [OrderController::class, 'getProductStats']);
+
