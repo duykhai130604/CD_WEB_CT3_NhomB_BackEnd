@@ -76,4 +76,12 @@ class User extends Authenticatable implements JWTSubject
         ->groupBy('users.id')
         ->paginate(5);
     }
+    public static function countUsers()
+    {
+        $userCount = User::count();
+        return response()->json([
+            'message' => 'Total users retrieved successfully',
+            'total_users' => $userCount
+        ]);
+    }
 }

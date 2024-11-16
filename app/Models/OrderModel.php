@@ -76,7 +76,7 @@ class OrderModel extends Model
             ->orderBy('product_order.created_at', 'desc')
             ->paginate(100);
     }
-    public static function getOrderDetailsByDate($date)  
+    public static function getOrderDetailsByDate($date)
     {
         return self::select(
             'product_order.id as id',
@@ -114,6 +114,23 @@ class OrderModel extends Model
             ->orderBy('orders.created_at', 'desc')
             ->paginate(100); 
     }
-    
-    
+
+    public static function calculateTotalAmount()
+    {
+        $totalAmount = DB::table('orders')->sum('amount');
+
+        return response()->json([
+            'message' => 'Total amount calculated successfully',
+            'total_amount' => $totalAmount
+        ]);
+    }
+    public static function countOrders()
+    {
+        $orderCount = DB::table('orders')->count();
+
+        return response()->json([
+            'message' => 'Total orders retrieved successfully',
+            'total_orders' => $orderCount
+        ]);
+    }
 }
