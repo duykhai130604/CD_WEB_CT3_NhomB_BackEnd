@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -69,17 +70,17 @@ class AuthController extends Controller
     }
 
     public function logout(Request $request)
-{
-    $token = $request->cookie('token');
+    {
+        $token = $request->cookie('token');
 
-    if (!$token) {
-        return response()->json(['error' => 'No active session found'], 400);
+        if (!$token) {
+            return response()->json(['error' => 'No active session found'], 400);
+        }
+
+        $cookie = cookie()->forget('token');
+
+        return response()->json(['message' => 'Logout successful'])->withCookie($cookie);
     }
-
-    $cookie = cookie()->forget('token');
-
-    return response()->json(['message' => 'Logout successful'])->withCookie($cookie);
-}
 
     public function refresh()
     {

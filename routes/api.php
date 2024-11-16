@@ -37,7 +37,6 @@ use App\Http\Controllers\ChatController;
 */
 
 
-Route::post('/send-message', [ChatController::class, 'sendMessage']);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -59,6 +58,9 @@ Route::post('/admin/editProduct', [ProductController::class, 'editProduct']);
 Route::delete('/admin/deleteProduct', [ProductController::class, 'deleteProduct']);
 Route::get('/admin/productVariants', [ProductVariantController::class, 'getAllProductVariants']);
 
+Route::get('/admin/getTotalUsers', [HomeController::class, 'getTotalUsers']);
+Route::get('/admin/getTotalAmount', [HomeController::class, 'calculateTotalAmount']);
+Route::get('/admin/getTotalOrders', [HomeController::class, 'countOrders']);
 
 Route::get('/products/top', [HomeController::class, 'getTopProducts']);
 Route::get('/products', [ProductController::class, 'getAllProducts']);
@@ -67,7 +69,6 @@ Route::get('/getAllCategories', [CategoryController::class, 'getAllCategories'])
 
 Route::get('/getProductDetails', [ProductController::class, 'getProductDetails']);
 Route::delete('/admin/deleteProduct', [ProductController::class, 'deleteProduct']);
-Route::get('/admin/productVariants', [ProductVariantController::class, 'getAllProductVariants']);
 Route::get('/getProductbyID/{id}', [ProductController::class, 'getProductbyID']);
 
 
