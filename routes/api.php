@@ -41,18 +41,16 @@ use App\Http\Controllers\ChatController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+// Admin
+Route::middleware(['role:admin'])->group(function () {
 
-// Route::middleware(['custom.auth', 'role:admin'])->group(function () {
-//     Route::post('/admin/addProduct', [ProductController::class, 'addProduct']);
-//     Route::post('/admin/editProduct', [ProductController::class, 'editProduct']);
-//     Route::delete('/admin/deleteProduct', [ProductController::class, 'deleteProduct']);
-//     Route::get('/admin/productVariants', [ProductVariantController::class, 'getAllProductVariants']);
-// });
-Route::middleware(['role:admin'])->get('/test-role', function () {
-    return response()->json(['message' => 'Role middleware applied']);
 });
 
-Route::get('/checkProduct', [ProductController::class, 'checkProduct']);
+// User
+Route::middleware(['role:user'])->group(function () {
+    Route::get('/checkProduct', [ProductController::class, 'checkProduct']);
+});
+
 Route::post('/admin/addProduct', [ProductController::class, 'addProduct']);
 Route::post('/admin/editProduct', [ProductController::class, 'editProduct']);
 Route::delete('/admin/deleteProduct', [ProductController::class, 'deleteProduct']);
