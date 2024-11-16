@@ -73,8 +73,8 @@ class OrderModel extends Model
             ->join('sizes', 'sizes.id', '=', 'product_variants.size_id')
             ->join('colors', 'colors.id', '=', 'product_variants.color_id')
             ->join('users', 'users.id', '=', 'orders.user_id')
-            ->orderBy('orders.created_at', 'desc')
-            ->paginate(10);
+            ->orderBy('product_order.created_at', 'desc')
+            ->paginate(100);
     }
     public static function getOrderDetailsByDate($date)  
     {
@@ -112,7 +112,7 @@ class OrderModel extends Model
             ->join('users', 'users.id', '=', 'orders.user_id')
             ->whereDate('product_order.created_at', $date)
             ->orderBy('orders.created_at', 'desc')
-            ->paginate(10); 
+            ->paginate(100); 
     }
     
     

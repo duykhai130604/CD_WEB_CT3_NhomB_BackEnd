@@ -65,6 +65,15 @@ class OrderController extends Controller
         }
         return response()->json($purchase, 200);
     }
+    public function getProductStats( Request $request)
+    {
+     
+        $purchase = ProductOrder::getProductStats($request->month,$request->year);
+        if (!$purchase) {
+            return response()->json(['message' => 'Product order not found or invalid status'], 404);
+        }
+        return response()->json($purchase, 200);
+    }
 
     
 }

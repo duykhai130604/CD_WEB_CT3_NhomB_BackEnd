@@ -182,4 +182,5 @@ Route::put('/product-order/update-status', [OrderController::class, 'updateStatu
 //purchase
 Route::get('/order-stats/{year}', [OrderController::class, 'getMonthlyOrderStats']);
 Route::get('/monthly-reason-stats', [OrderController::class, 'getMonthlyReasonStats']);
+Route::get('/order-cancled', [OrderController::class, 'getProductStats']);
 

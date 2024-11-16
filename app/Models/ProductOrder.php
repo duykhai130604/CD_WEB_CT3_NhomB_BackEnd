@@ -51,19 +51,39 @@ class ProductOrder extends Model
             ->orderBy(DB::raw('MONTH(created_at)'))
             ->get();
     }
-   
+
     public static function getMonthlyReasonStats($month, $year)
+    {
+        return DB::table('product_order')
+            ->select(
+                'reason',
+                DB::raw('COUNT(*) as reason_count')
+            )
+            ->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->whereIn('status', [2, 0])
+            ->groupBy('reason')
+            ->orderByDesc(DB::raw('COUNT(*)'))
+            ->paginate(5);
+    }
+    public static function getProductStats($month, $year)
 {
     return DB::table('product_order')
-        ->select(
-            'reason',
-            DB::raw('COUNT(*) as reason_count')
-        )
-        ->whereYear('created_at', $year)
-        ->whereMonth('created_at', $month)  
-        ->groupBy('reason')
-        ->orderByDesc(DB::raw('COUNT(*)'))  
-        ->paginate(5);
+    ->join('product_variants', 'product_order.product_variant_id', '=', 'product_variants.id')
+    ->join('products', 'product_variants.product_id', '=', 'products.id')
+    ->select(
+        'products.name',
+        'product_order.reason as reason',
+        'product_order.created_at as created_at',
+        DB::raw('COUNT(product_order.id) as product_count')
+    )
+    ->whereYear('product_order.created_at', $year)
+    ->whereMonth('product_order.created_at', $month)
+    ->whereIn('product_order.status', [2, 0])
+    ->groupBy('products.name', 'product_order.reason', 'product_order.created_at')
+    ->orderBy('product_count', 'desc')
+    ->paginate(5);
+
 }
 
 }
