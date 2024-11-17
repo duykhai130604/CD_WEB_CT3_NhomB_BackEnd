@@ -13,7 +13,6 @@ class HomeController extends Controller
     public function getTopProducts()
     {
         $topProducts = Product::getNewProducts();
-
         return response()->json($topProducts);
     }
     public function getProductByRatingRange(Request $request)

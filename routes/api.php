@@ -14,6 +14,7 @@ use App\Http\Controllers\BlogController;
 
 use Illuminate\Support\Facades\Crypt;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BehaviorController;
 use App\Http\Controllers\ColorController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\OrderController;
@@ -184,4 +185,9 @@ Route::put('/product-order/update-status', [OrderController::class, 'updateStatu
 Route::get('/order-stats/{year}', [OrderController::class, 'getMonthlyOrderStats']);
 Route::get('/monthly-reason-stats', [OrderController::class, 'getMonthlyReasonStats']);
 Route::get('/order-cancled', [OrderController::class, 'getProductStats']);
+
+Route::post('followProduct', [BehaviorController::class, 'follow']);
+Route::post('checkFollow', [BehaviorController::class, 'checkFollow']);
+
+Route::get('get-follow', [BehaviorController::class, 'getFollowedProducts']);
 
