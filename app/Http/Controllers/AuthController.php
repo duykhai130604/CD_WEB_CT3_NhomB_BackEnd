@@ -44,9 +44,10 @@ class AuthController extends Controller
     }
 
 
-    public function login(Request $request)
+    public function login(Request $request) 
     {
         $credentials = $request->only('email', 'password');
+    
         try {
             if (!$token = JWTAuth::attempt($credentials)) {
                 return response()->json(['error' => 'Invalid credentials'], 401);
@@ -54,33 +55,55 @@ class AuthController extends Controller
         } catch (JWTException $e) {
             return response()->json(['error' => 'Could not create token'], 500);
         }
-        $cookie = cookie('token', $token, 60, null, null, false, true); // 60 phút, HTTP-only
-        return response()->json(['message' => 'Logged in successfully', 'user' => auth()->user()])->cookie($cookie);
+        return response()->json([
+            'message' => 'Logged in successfully',
+            'user' => auth()->user(),
+            'token' => $token
+        ]);
     }
-    public function me(Request $request)
+    
+    public function me(Request $request) 
     {
-        $user = $request->attributes->get('user');
-        if (!$user) {
-            return response()->json(['error' => 'User not authenticated'], 401);
+            $token = $request->header('Authorization');
+    
+        if (!$token) {
+            return response()->json(['error' => 'Token not provided'], 401);
         }
+    
+        // Strip 'Bearer ' prefix
+        $token = str_replace('Bearer ', '', $token);
+    
+        try {
+            $user = JWTAuth::toUser($token);
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Invalid or expired token'], 401);
+        }
+    
         return response()->json([
             'name' => $user->name,
             'email' => $user->email
         ]);
-    }
+    }    
 
-    public function logout(Request $request)
+    public function logout(Request $request) 
     {
-        $token = $request->cookie('token');
-
+        $token = $request->header('Authorization');
+    
         if (!$token) {
-            return response()->json(['error' => 'No active session found'], 400);
+            return response()->json(['error' => 'Token not provided'], 400);
         }
-
-        $cookie = cookie()->forget('token');
-
-        return response()->json(['message' => 'Logout successful'])->withCookie($cookie);
+    
+        $token = str_replace('Bearer ', '', $token);
+    
+        try {
+            JWTAuth::invalidate($token);
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Could not invalidate token'], 500);
+        }
+    
+        return response()->json(['message' => 'Logout successful']);
     }
+    
 
     public function refresh()
     {

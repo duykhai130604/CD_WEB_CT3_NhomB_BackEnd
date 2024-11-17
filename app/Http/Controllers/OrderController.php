@@ -47,5 +47,33 @@ class OrderController extends Controller
 
         return response()->json(['message' => 'Product order updated successfully'], 200);
     }
+    public function getMonthlyOrderStats( Request $request)
+    {
+     
+        $purchase = ProductOrder::getMonthlyOrderStats($request->year);
+        if (!$purchase) {
+            return response()->json(['message' => 'Product order not found or invalid status'], 404);
+        }
+        return response()->json($purchase, 200);
+    }
+    public function getMonthlyReasonStats( Request $request)
+    {
+     
+        $purchase = ProductOrder::getMonthlyReasonStats($request->month,$request->year);
+        if (!$purchase) {
+            return response()->json(['message' => 'Product order not found or invalid status'], 404);
+        }
+        return response()->json($purchase, 200);
+    }
+    public function getProductStats( Request $request)
+    {
+     
+        $purchase = ProductOrder::getProductStats($request->month,$request->year);
+        if (!$purchase) {
+            return response()->json(['message' => 'Product order not found or invalid status'], 404);
+        }
+        return response()->json($purchase, 200);
+    }
+
     
 }
