@@ -554,7 +554,8 @@ class Product extends Model
         return self::withCount('ratings')
             ->withAvg('ratings', 'rating')
             ->orderBy('created_at', 'desc')
-            ->paginate(8);
+            ->limit(16)
+            ->paginate(4);
     }
     public static function getProductsByRatingRange($minRating)
     {
