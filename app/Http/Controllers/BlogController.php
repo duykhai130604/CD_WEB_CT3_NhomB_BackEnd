@@ -6,6 +6,7 @@ use App\Models\Blog;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Storage;
 
 class BlogController extends Controller
 {
@@ -38,34 +39,72 @@ class BlogController extends Controller
 
     public function addBlog(Request $request)
     {
+        // Lấy thông tin user từ token
+        $user = $request->user();
+    
+        // Xác thực dữ liệu đầu vào
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
-            'thumbnail' => 'image|mimes:jpeg,png,jpg,gif|max:5000',
-            'user_id' => 'required|integer',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5000',
             'status' => 'required|integer',
         ]);
-
+    
+        // Thêm user_id vào dữ liệu đã xác thực
+        $validatedData['user_id'] = $user->id;
+    
+        // Nếu có tệp thumbnail, lưu tệp và lấy đường dẫn
+        if ($request->hasFile('thumbnail')) {
+            $path = $request->file('thumbnail')->store('uploads/thumbnails', 'public');
+            $validatedData['thumbnail'] = $path;
+        }
+    
+        // Tạo blog
         $blog = Blog::create($validatedData);
+    
+        // Trả về phản hồi JSON
         return response()->json($blog, 201);
     }
-
-    public function updateBlog(Request $request) 
-    {   
+    
+    
+    public function updateBlog(Request $request)
+    {
         try {
-            $decryptedId = Crypt::decrypt($request->id);          
+            // Giải mã ID blog từ request
+            $decryptedId = Crypt::decrypt($request->id);
+            
+            // Kiểm tra tính hợp lệ của ID
             if (!is_numeric($decryptedId) || intval($decryptedId) <= 0) {
                 return response()->json(['error' => 'Invalid ID format.'], 400);
-            }      
+            }
+    
+            // Xác thực dữ liệu đầu vào
             $validatedData = $request->validate([
                 'title' => 'required|string|max:255',
                 'content' => 'required|string',
-                'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-                'user_id' => 'required|integer',
+                'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5000', // Kiểm tra thumbnail
+                'status' => 'required|integer',
             ]);
-
+    
+            // Tìm blog cần cập nhật
             $blog = Blog::findOrFail((int)$decryptedId);
+    
+            // Nếu có tệp thumbnail, lưu và lấy đường dẫn
+            if ($request->hasFile('thumbnail')) {
+                // Xóa thumbnail cũ nếu có
+                if ($blog->thumbnail) {
+                    Storage::disk('public')->delete($blog->thumbnail);
+                }
+    
+                // Lưu tệp thumbnail mới và cập nhật đường dẫn
+                $path = $request->file('thumbnail')->store('uploads/thumbnails', 'public');
+                $validatedData['thumbnail'] = $path;
+            }
+    
+            // Cập nhật blog với dữ liệu mới
             $blog->update($validatedData);
+    
+            // Trả về phản hồi JSON với dữ liệu blog đã cập nhật
             return response()->json($blog);
         } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
             return response()->json(['error' => 'Invalid or corrupted ID.'], 400);
@@ -73,6 +112,7 @@ class BlogController extends Controller
             return response()->json(['error' => 'Blog not found.'], 404);
         }
     }
+    
     public function deleteBlog($encryptedId)
     {
         try {

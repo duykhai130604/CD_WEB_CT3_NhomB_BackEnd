@@ -481,7 +481,12 @@ class Product extends Model
     public static function getTopProductsByUserInteracted($userId)
     {
         // Truy vấn các sản phẩm liên quan dựa trên các sản phẩm mà user đã tương tác
-        $relatedProducts = self::select('similar_products.id', 'similar_products.name', 'similar_products.price', DB::raw('NULL as interaction_count'))
+        $relatedProducts = self::select(
+            'similar_products.id', 
+            'similar_products.name', 
+            'similar_products.price',
+            DB::raw('NULL as interaction_count')
+        )
             ->join('behaviors', 'products.id', '=', 'behaviors.product_id')
             ->leftJoin('product_category as pc_user', 'pc_user.product_id', '=', 'products.id')
             ->leftJoin('product_category as pc_similar', 'pc_user.category_id', '=', 'pc_similar.category_id')
@@ -491,22 +496,40 @@ class Product extends Model
             ->whereNotNull('similar_products.id')
             ->whereNotNull('similar_products.name')
             ->whereNotNull('similar_products.price');
-
+    
         // Truy vấn các sản phẩm có lượt tương tác cao từ tất cả các user
-        $popularProducts = self::select('products.id', 'products.name', 'products.price', DB::raw('COUNT(behaviors.id) as interaction_count'))
+        $popularProducts = self::select(
+            'products.id', 
+            'products.name', 
+            'products.price', 
+            DB::raw('COUNT(behaviors.id) as interaction_count')
+        )
             ->join('behaviors', 'products.id', '=', 'behaviors.product_id')
             ->whereIn('behaviors.action', ['click', 'follow'])
             ->groupBy('products.id', 'products.name', 'products.price') // Cần nhóm theo các trường đã chọn
             ->orderByDesc('interaction_count');
-
+    
         // Kết hợp hai truy vấn và loại bỏ các bản ghi trùng lặp theo id
         $combinedQuery = $relatedProducts->union($popularProducts)
             ->distinct()
             ->orderByRaw('RAND()');
-
-        // Lấy kết quả và phân trang
-        return $combinedQuery->paginate(4);
+    
+        // Lấy danh sách sản phẩm
+        $products = $combinedQuery->paginate(4);
+    
+        // Thêm thông tin đếm số lượt đánh giá và điểm trung bình đánh giá
+        foreach ($products as $product) {
+            $productModel = self::withCount('ratings')
+                ->withAvg('ratings', 'rating')
+                ->find($product->id);
+    
+            $product->ratings_count = $productModel->ratings_count ?? 0;
+            $product->ratings_avg_rating = $productModel->ratings_avg_rating ?? 0;
+        }
+    
+        return $products;
     }
+    
     public static function getProductsBySimilarNameAndCategory($productId)
     {
         $product = self::select('name')

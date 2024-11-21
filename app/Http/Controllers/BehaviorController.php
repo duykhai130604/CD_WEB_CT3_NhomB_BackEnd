@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Behavior;
 use App\Models\Follow;
+use App\Models\Product;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
@@ -41,16 +42,22 @@ class BehaviorController extends Controller
         $productId = Crypt::decrypt($request->product_id);
         $isFollowing = Follow::checkFollow($user->id, $productId);
         return response()->json([
-            'isFollowing' => $isFollowing 
+            'isFollowing' => $isFollowing
         ], 200);
     }
-    public function getFollowedProducts(){
+    public function getFollowedProducts()
+    {
         try {
             $user = JWTAuth::parseToken()->authenticate();
         } catch (\Exception $e) {
             return response()->json(['error' => 'User not authenticated'], 401);
         }
         $isFollowing = Follow::getFollowedProducts($user->id,);
-      return response()->json($isFollowing);
+        return response()->json($isFollowing);
+    }
+    //get data
+    public function data()
+    {
+        return Product::all();
     }
 }
