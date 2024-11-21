@@ -565,5 +565,4 @@ class Product extends Model
         ->having('ratings_avg_rating', '<=', 5) 
         ->paginate(8);
     }
-    
 }

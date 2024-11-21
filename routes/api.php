@@ -191,3 +191,6 @@ Route::post('checkFollow', [BehaviorController::class, 'checkFollow']);
 
 Route::get('get-follow', [BehaviorController::class, 'getFollowedProducts']);
 
+//get data
+Route::get('all', [BehaviorController::class, 'data']);
+
