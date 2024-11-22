@@ -20,7 +20,7 @@ class RoleMiddleware
     {
         try {
             // Lấy token từ tham số 'token' trong query string
-            $token = $request->input('token');
+            $token = $request->input('token') ?? $request->bearerToken();
 
             // Nếu không có token, trả về lỗi
             if (!$token) {
@@ -28,7 +28,6 @@ class RoleMiddleware
                 return response()->json(['error' => 'Token not provided'], 401);
             }
 
-            // Xác thực người dùng với token lấy từ tham số
             $user = JWTAuth::setToken($token)->authenticate();
         } catch (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
             // Nếu token hết hạn

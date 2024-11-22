@@ -129,7 +129,6 @@ class CartModel extends Model
     public static function addToCart($request)
     {
         try {
-            // Xác thực người dùng qua JWT token
             $user = JWTAuth::parseToken()->authenticate();
             $userId = $user->id;
 
